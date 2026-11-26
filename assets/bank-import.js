@@ -3,9 +3,9 @@
  * No transaction IDs or accounting classifications are inferred from a PDF.
  */
 (function(root,factory){
-  if(typeof module==='object'&&module.exports)module.exports=factory(require('./data-engine.js'));
-  else root.YoushuBank=factory(root.YoushuData);
-})(typeof globalThis!=='undefined'?globalThis:this,function(D){
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./data-engine.js'), require('./boa-import.js'));
+  else root.YoushuBank=factory(root.YoushuData, root.YoushuBoa);
+})(typeof globalThis!=='undefined'?globalThis:this,function(D,Boa){
   'use strict';
   const HEADERS=['记账日期','货币','交易金额','联机余额','交易摘要','对手信息'];
   const text=v=>String(v==null?'':v).trim(),clean=v=>text(v).replace(/\s/g,''),cents=v=>Math.round(v*100);
@@ -195,7 +195,7 @@
     warnings.push('原始摘要和收支方向已保留；尚未区分个人消费、企业经营与账户互转，收支差额不是利润。');
     return {rows,errors,warnings,statement:{format:'bob-pdf-v1',sourceName:name,bank:'北京银行',accountMasked,account,start:firstMeta.start,end:firstMeta.end,pages:declaredPages,recordCount:all.length,income:income/100,outflow:outflow/100,openingBalance:firstRow?(cents(firstRow.balance)-cents(firstRow.signedAmount))/100:null,openingBalanceInferred:true,closingBalance:lastRow?.balance??null,balanceChecked:all.length>1&&errors.length===0,balanceCheckCount:Math.max(0,all.length-1),balanceErrors,hasTransactionIds:false,sourceOrder:'descending',zeroRows,zeroCount:zeroRows.length}};
   }
-  function detect(result){return detectCmb(result)||detectBob(result);}
-  function parse(result,name){return detectBob(result)?parseBob(result,name):parseCmb(result,name);}
+  function detect(result){return detectCmb(result)||detectBob(result)||!!Boa?.detect(result);}
+  function parse(result,name){return Boa?.detect(result)?Boa.parse(result,name):detectBob(result)?parseBob(result,name):parseCmb(result,name);}
   return Object.freeze({detect,parse});
 });

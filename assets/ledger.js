@@ -11,6 +11,8 @@
   const clone=v=>JSON.parse(JSON.stringify(v)),text=v=>String(v==null?'':v).trim(),cents=v=>Math.round(v*100);
   const base=()=>({schemaVersion:1,company:'',openingCash:null,asOf:'',cash:[],profit:[],ar:[],balance:[]});
   function fault(message,code='INVALID_LEDGER'){const e=new Error(message);e.code=code;throw e;}
+  function currencyMismatch(){fault('一个账本只能使用一种币种。请先下载当前账本备份，然后在空账本中导入另一种币种的账单。','CURRENCY_MISMATCH');}
+  function currencyOf(value){if(value===undefined)return 'CNY';if(value==='CNY'||value==='USD')return value;fault('账本币种无效。','INVALID_CURRENCY');}
   function canonical(value){
     if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
     if(value&&typeof value==='object')return '{'+Object.keys(value).filter(k=>value[k]!==undefined&&!['sourceRow','sourceImportId','sourceImportName','sourceImportIds','sourceImports','sourceAccount'].includes(k)).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}';
@@ -31,7 +33,11 @@
     if(sourceType!=='generic'&&batch.kind!=='cash')fault('支付平台账单必须为现金流水。');
     const result={...clone(batch),id:text(batch.id)||'import-'+(index+1),name:text(batch.name)||'未命名账单',kind:batch.kind,sourceType,accountScope:text(batch.accountScope)||(sourceType==='wechat'?'微信支付':sourceType==='alipay'?'支付宝':''),importedAt:text(batch.importedAt)||new Date().toISOString()};result.rows=result.rows.map(stripProvenance);
     if(result.id.length>200||result.name.length>1000||result.accountScope.length>200)fault('导入记录的名称或账户名称过长。');
-    const validation=D.validateProject({...base(),[result.kind]:result.rows});
+    result.currency=currencyOf(result.currency===undefined?result.bankStatement?.currency:result.currency);
+    if((sourceType!=='generic'&&result.currency!=='CNY')||
+       (result.bankStatement&&currencyOf(result.bankStatement.currency)!==result.currency)||
+       result.rows.some(r=>r?.currency!==undefined&&r.currency!==result.currency))currencyMismatch();
+    const validation=D.validateProject({...base(),currency:result.currency,[result.kind]:result.rows});
     if(!validation.valid)fault('“'+result.name+'”的来源数据无效：'+validation.errors.slice(0,3).map(x=>x.message).join('；'));
     if(sourceType!=='generic'&&!result.statement)fault('支付平台账单缺少原始汇总信息。');
     if(sourceType!=='generic')for(const r of result.rows){
@@ -121,10 +127,44 @@
       }
     }
   }
+  function validateBoaStatement(batch,s,fail){
+    // This format groups transactions by section and prints balances only
+    // in the account summary. A blank legal/disclosure page may have no rows.
+    const invalid=()=>fail('美国银行月结单的来源记录与账户汇总不一致。');
+    const money=value=>{if(typeof value!=='number')invalid();return cents(D.parseMoney(value));};
+    if(s.bank!=='Bank of America'||s.currency!=='USD'||batch.currency!=='USD'||s.sourceOrder!=='section'||
+       s.openingBalanceInferred!==false||s.hasTransactionIds!==false||s.balanceChecked!==true||
+       s.balanceCheckCount!==1||!Array.isArray(s.balanceErrors)||s.balanceErrors.length||
+       !text(s.sourceName)||!text(s.account)||!/^\*{4}\d{4}$/.test(s.accountMasked)||!Number.isSafeInteger(s.pages)||s.pages<1||
+       s.recordCount!==batch.rows.length||(s.zeroRows!==undefined&&(!Array.isArray(s.zeroRows)||s.zeroRows.length)))invalid();
+    if(D.parseDate(s.start)!==s.start||D.parseDate(s.end)!==s.end||s.start>s.end)invalid();
+    const sections=s.sectionTotals,knownSections=['deposits','card','other','checks','fees','withdrawals'];
+    if(!sections||typeof sections!=='object'||Array.isArray(sections)||!Object.hasOwn(sections,'deposits')||
+       !['withdrawals','card','other'].some(key=>Object.hasOwn(sections,key))||
+       Object.keys(sections).some(key=>!knownSections.includes(key)))invalid();
+    const sums=new Map(Object.keys(sections).map(key=>[key,0])),positions=new Set();
+    let income=0,outflow=0;
+    for(const row of batch.rows){
+      if(row.id!==''||row.bankFormat!==s.format||row.currency!=='USD'||row.account!==s.account||row.balance!==null||
+         row.date<s.start||row.date>s.end||!sums.has(row.section)||!text(row.category)||
+         !Number.isSafeInteger(row.sourcePage)||row.sourcePage<1||row.sourcePage>s.pages||
+         !Number.isSafeInteger(row.sourceRow)||row.sourceRow<1||!Array.isArray(row.sourceRows)||
+         row.sourceRows[0]!==row.sourceRow||row.sourceRows.some((n,i)=>!Number.isSafeInteger(n)||n<1||(i>0&&n<=row.sourceRows[i-1])))invalid();
+      for(const line of row.sourceRows){const position=row.sourcePage+':'+line;if(positions.has(position))invalid();positions.add(position);}
+      const received=money(row.inflow),paid=money(row.outflow),signed=received-paid;
+      if(received<0||paid<0||!signed||(received&&paid)||(row.section==='deposits')!==(signed>0)||row.direction!==(signed>0?'收入':'支出')||
+         money(row.signedAmount)!==signed||money(row.amount)!==Math.abs(signed))invalid();
+      income+=received;outflow+=paid;sums.set(row.section,sums.get(row.section)+signed);
+      if(!Number.isSafeInteger(income)||!Number.isSafeInteger(outflow))invalid();
+    }
+    for(const [key,total] of sums)if(money(sections[key])!==total)invalid();
+    if(money(s.income)!==income||money(s.outflow)!==outflow||money(s.openingBalance)+income-outflow!==money(s.closingBalance))invalid();
+  }
   function validateBankStatement(batch){
     const s=batch.bankStatement;
     const fail=message=>fault('银行账单备份无效：'+message,'INVALID_BANK_STATEMENT');
     if(batch.kind!=='cash'||batch.sourceType!=='generic'||!s||typeof s!=='object'||Array.isArray(s))fail('来源记录类型不正确。');
+    if(s.format==='boa-checking-pdf-v1'){validateBoaStatement(batch,s,fail);return;}
     const descending=s.format==='bob-pdf-v1';
     if(!(s.format==='cmb-pdf-v1'&&s.bank==='招商银行'||descending&&s.bank==='北京银行'))fail('银行或账单格式不受支持。');
     if(descending?s.sourceOrder!=='descending':s.sourceOrder!==undefined&&s.sourceOrder!=='ascending')fail('原账单排列顺序与银行格式不一致。');
@@ -177,7 +217,9 @@
     if(income!==declaredIncome||outflow!==declaredOutflow||opening!==declaredOpening||closing!==declaredClosing)fail('收支汇总、推算期初或期末余额与来源明细不一致。');
   }
   function projectFromImports(input,imports){
-    const project={...clone(input),cash:[],profit:[],ar:[],balance:[],ledger:{version:1,imports}};
+    const currency=currencyOf(input.currency===undefined?imports[0]?.currency:input.currency);
+    if(imports.some(batch=>batch.currency!==currency))currencyMismatch();
+    const project={...clone(input),currency,cash:[],profit:[],ar:[],balance:[],ledger:{version:1,imports}};
     delete project.wechatStatement;delete project.alipayStatement;delete project.ledgerStatement;
     const seen=new Map(),statsById=new Map();
     for(const batch of imports){
@@ -230,7 +272,20 @@
   function migrate(project){return rebuild(project===undefined?base():project);}
   function add(input,batch){
     const project=migrate(input),imports=project.ledger.imports,next=normalizedBatch(batch,imports.length);
-    const signature=identity(next),stable=hasStableIdentities(next),duplicate=imports.find(b=>(stable||sameSourceFile(b,next))&&identity(b)===signature);
+    if(project.currency!==next.currency){
+      if(imports.length||project.openingCash!==null||project.openingBalance||project.supplements?.records?.length)currencyMismatch();
+      project.currency=next.currency;
+    }
+    const boa=next.bankStatement?.format==='boa-checking-pdf-v1';
+    const signature=identity(next),stable=hasStableIdentities(next),duplicate=imports.find(b=>{
+      if(boa&&b.bankStatement?.format===next.bankStatement.format){
+        if(sameSourceFile(b,next))return true;
+        const s=b.bankStatement,t=next.bankStatement;
+        if(s.accountMasked===t.accountMasked&&s.account===t.account&&s.start===t.start&&s.end===t.end&&
+           s.openingBalance===t.openingBalance&&s.closingBalance===t.closingBalance&&identity(b)===signature)return true;
+      }
+      return (stable||sameSourceFile(b,next))&&identity(b)===signature;
+    });
     if(duplicate)return {project,duplicate:true,existingImportId:duplicate.id,stats:{added:0,duplicates:records(next).length,updated:0,total:records(next).length}};
     if(imports.some(b=>b.id===next.id)){
       if(batch.id)fault('这次导入的编号已存在，请重试。');

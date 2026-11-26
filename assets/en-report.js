@@ -8,6 +8,21 @@
     }
   }
   add(`
+单位：万美元|Amounts in USD 10,000s
+本笔金额达到 USD 5,000|Transaction amount of at least USD 5,000
+美元|USD
+万美元|USD × 10,000
+账单期初余额|Statement opening balance
+账单期末余额|Statement closing balance
+已核对各类收支总额及期初期末余额|Transaction totals by section match the statement summary and reconcile with the opening and closing balances
+账单总额及期初期末余额待核对|Statement totals and opening and closing balances need review
+核对信息保留各文件的原始统计。|These figures come from each original statement.
+金额单位为美元，按本报告的数据计算。|Amounts are in USD, calculated from this report.
+金额：美元。流水按用户提供的原始记录显示；内部转账计入账户流动，不计经营收支。|Amounts in USD. Transactions follow the supplied records. Transfers between accounts affect individual balances and are excluded from operating receipts and payments.
+金额：美元。原始现金流保留；本金和转账与收入分开列示。|Amounts in USD. Original cash movements are retained. Principal and transfers are displayed separately from income.
+月度收支，金额单位万美元；悬停或聚焦柱子显示全部金额，点击查看明细|Monthly receipts and payments in tens of thousands of USD. Hover over or focus a bar for amounts. Select it for details.
+首月额外支付（税款等，美元）|Additional payment in the first month, such as tax (USD)
+每月可削减的支出（美元）|Monthly spending reduction (USD)
 全部为虚构示例|Fictional example
 再来一个|Another example
 报告期间|Reporting period
@@ -982,6 +997,7 @@ Excel组件未加载|The spreadsheet component is unavailable.
 期末现金 {}，逾期未收 {}。|Closing cash: {1}. Overdue receivables: {2}.
 期末账户余额 {}，逾期未收 {}。|Closing cash balance: {1}. Overdue receivables: {2}.
 期末现金 {}。|Closing cash: {1}.
+{} · 美元｜金额单位：万美元|{1} · US dollars
 {} · 人民币｜金额单位：万元|{1} · Chinese yuan
 期末逾期应收占比 {}|Overdue receivables: {1}
 最大收款来源占比 {}|Largest receipt source: {1}
@@ -1010,6 +1026,8 @@ Excel组件未加载|The spreadsheet component is unavailable.
 {} 笔 · 合计 {}|{1} transactions · total {2}
 {} 笔原始记录 · {} 个有记录月份|{1} source records · {2} months with records
 已收 {}|Collected {1}
+安全线 {}万美元 · {}|Cash buffer: {1} × USD 10,000 · {2}
+安全线 {}万美元|Cash buffer: {1} × USD 10,000
 安全线 {}万|Cash buffer: {1} × CNY 10,000
 {} 账上现金（历史）{}|{1} historical cash: {2}
 {} 账上现金（推演）{}|{1} projected cash: {2}
@@ -1091,15 +1109,15 @@ Excel组件未加载|The spreadsheet component is unavailable.
 使用最近已提供的 {} 快照，不推算到报告截止日。|Uses the latest supplied snapshot dated {1}, without projecting to the reporting date.
 `);
   patterns.push(
-    [/^(其他支出|其他收入)（(\d+)项）\s*((?:¥|CNY )-?[\d,.]+)$/, (_, type, count, amount) => (type === '其他支出' ? 'Other spending' : 'Other receipts') + ' (' + count + ' categories) ' + localize(amount)],
-    [/^期间成本费用 (.+?)，最大现金付款分类为(.+?) ((?:¥|CNY )-?[\d,.]+)。$/, (_, total, category, amount) => 'Costs and expenses totaled ' + localize(total) + '. The largest payment category was ' + localize(category) + ' at ' + localize(amount) + '.'],
+    [/^(其他支出|其他收入)（(\d+)项）\s*((?:¥|CNY |USD )-?[\d,.]+)$/, (_, type, count, amount) => (type === '其他支出' ? 'Other spending' : 'Other receipts') + ' (' + count + ' categories) ' + localize(amount)],
+    [/^期间成本费用 (.+?)，最大现金付款分类为(.+?) ((?:¥|CNY |USD )-?[\d,.]+)。$/, (_, total, category, amount) => 'Costs and expenses totaled ' + localize(total) + '. The largest payment category was ' + localize(category) + ' at ' + localize(amount) + '.'],
     [/^(\d+)\s*天$/, (_, days) => days + (days === '1' ? ' day' : ' days')],
     [/^(\d+)分$/, (_, score) => score + ' pts'],
     [/^(\d+(?:—\d+)?)天$/, (_, days) => days + ' days'],
     [/^(\d+)[.．] (.+)$/, (_, i, title) => i + '. ' + localize(title)],
     [/^(.+?)。\s+(账务分析使用独立账务资料.+)$/, (_, claim, basis) => localize(claim + '。') + ' ' + localize(basis)],
     [/^(.+?。)\s+(账务利润按已提供的账务资料计算.+|本表完整保留实际资金流.+)$/, (_, claim, basis) => localize(claim) + ' ' + localize(basis)],
-    [/^([\u4e00-\u9fffA-Za-z\s／・]+?)\s+(¥[-\d,.]+)(\s*(?:·\s*)?[-\d.]+%)?$/, (_, name, amount, share) => localize(name.trim()) + ' ' + amount + (share || '')],
+    [/^([\u4e00-\u9fffA-Za-z\s／・]+?)\s+((?:¥|USD )[-\d,.]+)(\s*(?:·\s*)?[-\d.]+%)?$/, (_, name, amount, share) => localize(name.trim()) + ' ' + amount + (share || '')],
     [/^([\u4e00-\u9fff]+) ([\d.]+%)$/, (_, name, share) => localize(name) + ' ' + share]
   );
   add(`
@@ -1175,10 +1193,10 @@ Excel组件未加载|The spreadsheet component is unavailable.
     [/^(\d[\d,]*)\s*个账户$/, (_, count) => count + (count === '1' ? ' account' : ' accounts')],
     [/^(.+?)，查看明细$/, (_, label) => localize(label) + ', view details'],
     [/^(.+?)；查看当月(收款|付款)明细$/, (_, label, direction) => localize(label) + '; view ' + (direction === '收款' ? 'receipts' : 'payments') + ' for the month'],
-    [/^(\d{4}-\d{2}(?: — \d{4}-\d{2})?) (收入|支出|收支结余) ((?:[¥￥]|CNY )-?[\d,.]+)$/, (_, period, kind, amount) => period + ' ' + ({收入:'receipts',支出:'payments',收支结余:'net receipts'}[kind]) + ': ' + localize(amount)],
+    [/^(\d{4}-\d{2}(?: — \d{4}-\d{2})?) (收入|支出|收支结余) ((?:[¥￥]|CNY |USD )-?[\d,.]+)$/, (_, period, kind, amount) => period + ' ' + ({收入:'receipts',支出:'payments',收支结余:'net receipts'}[kind]) + ': ' + localize(amount)],
     [/^((?:[^；]+?-?\d+分；)+[^；]+?-?\d+分)$/, label => label.split('；').map(part=>part.replace(/^(.+?)(-?\d+)分$/,(_,metric,n)=>localize(metric)+' '+n+' pts')).join('; ')],
     [/^(.+?)\s+(\d[\d,]*)\s*笔。以上记录保留原始方向与金额，(.+)$/,(_, name, n, tail)=>localize(name)+' · '+localize(n+' 笔')+'. '+localize('以上记录保留原始方向与金额，'+tail)],
-    [/^(\d[\d,]*)\s*笔 · 合计 ((?:[¥￥]|CNY )-?[\d,.]+)。(.+)$/,(_,count,amount,reportingBasis)=>localize(count+' 笔')+' · Total: '+localize(amount)+'. '+localize(reportingBasis)]
+    [/^(\d[\d,]*)\s*笔 · 合计 ((?:[¥￥]|CNY |USD )-?[\d,.]+)。(.+)$/,(_,count,amount,reportingBasis)=>localize(count+' 笔')+' · Total: '+localize(amount)+'. '+localize(reportingBasis)]
   );
   (globalThis.YoushuEnglish ||= []).push({text, patterns});
 })();

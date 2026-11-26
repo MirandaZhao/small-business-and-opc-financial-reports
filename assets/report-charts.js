@@ -1,11 +1,14 @@
 /* Shared report charts. Every amount comes from the active report model. */
 (function(global){
 'use strict';
+function forCurrency(currency){
+const usd=currency==='USD';
+const chartUnit=usd?'万美元':'万元';
 const NS='http://www.w3.org/2000/svg';
 const C={ink:'#253a30',muted:'#69796e',line:'#e2e8e0',green:'#54876b',purple:'#a39dbf',blue:'#6c95b0',forecast:'#cf775e',red:'#ba675c'};
 const finite=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 const number=v=>finite(v)?Number(v):0;
-const money=v=>'¥'+Number(v).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:2});
+const money=v=>(usd?'USD ':'¥')+Number(v).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:2});
 const percent=v=>(v*100).toFixed(1).replace(/\.0$/,'')+'%';
 const wan=v=>(v/10000).toLocaleString('zh-CN',{maximumFractionDigits:Math.abs(v)<1000?4:2});
 const month=v=>String(v||'').replace(/^(\d{4})-(\d{2}).*$/,'$1/$2');
@@ -96,7 +99,7 @@ function monthly(container,rows,onMonth){
     });
     text(s,w-box.right,17,'净利润率',{'text-anchor':'end'});
   }
-  text(s,box.left,17,'万元');s.appendChild(amountLayer);s.appendChild(rateLayer);
+  text(s,box.left,17,chartUnit);s.appendChild(amountLayer);s.appendChild(rateLayer);
   s.setAttribute('aria-label',`共 ${rows.length} 个月。收款 ${money(rows.reduce((sum,r)=>sum+number(r.opIn),0))}，付款 ${money(rows.reduce((sum,r)=>sum+number(r.opOut),0))}。${hasMargin?'含已有账务的净利润率。':'未提供净利润率。'}点击柱子查看对应月份的原始明细。`);
   return s;
 }
@@ -254,12 +257,12 @@ function forecast(container,history,prediction,safety,onPoint,options={}){
   });
   if(finite(safety)){
     const offScale=Number(safety)<domain[0]||Number(safety)>domain[1];
-    if(offScale)text(s,box.left,h-5,'安全线 '+wan(Number(safety))+'万 · '+(Number(safety)<domain[0]?'低于':'高于')+'图示范围',{fill:C.green,'font-size':11,'data-forecast-safety':'outside'});
-    else{add(s,'line',{x1:box.left,x2:w-box.right,y1:y(Number(safety)),y2:y(Number(safety)),stroke:C.green,'stroke-width':1.2,'stroke-dasharray':'2 4'});text(s,box.left+4,Math.max(16,y(Number(safety))-7),'安全线 '+wan(Number(safety))+'万',{fill:C.green,'font-size':11});}
+    if(offScale)text(s,box.left,h-5,'安全线 '+wan(Number(safety))+(usd?'万美元':'万')+' · '+(Number(safety)<domain[0]?'低于':'高于')+'图示范围',{fill:C.green,'font-size':11,'data-forecast-safety':'outside'});
+    else{add(s,'line',{x1:box.left,x2:w-box.right,y1:y(Number(safety)),y2:y(Number(safety)),stroke:C.green,'stroke-width':1.2,'stroke-dasharray':'2 4'});text(s,box.left+4,Math.max(16,y(Number(safety))-7),'安全线 '+wan(Number(safety))+(usd?'万美元':'万'),{fill:C.green,'font-size':11});}
   }
   const last=prediction.at(-1);if(last&&finite(last.value))text(s,w-box.right,Math.max(box.top+14,Math.min(h-box.bottom-8,y(Number(last.value))-12)),money(last.value),{'text-anchor':'end',fill:C.forecast,'font-size':12,'font-weight':600,'data-forecast-ending':last.value});
   const step=Math.max(1,Math.ceil(rows.length/(w<450?4:7)));rows.forEach((r,i)=>{if(i%step===0||i===rows.length-1)text(s,x(i),h-(focused?29:15),r.opening?'期初':shortMonth(r.month),{'text-anchor':i===0?'start':i===rows.length-1?'end':'middle'});});
-  text(s,box.left,18,'万元');
+  text(s,box.left,18,chartUnit);
   const english=global.YoushuI18n?.language==='en';
   s.setAttribute('aria-label',rows.map((r,i)=>{
     const period=i<history.length?(r.estimated?'历史推算':'历史'):'预测';
@@ -302,7 +305,7 @@ function receivables(container,rows,onGroup,options={}){
       else text(s,x(index),h-18,shortMonth(g.month),{'text-anchor':'middle'});
     }
   });
-  text(s,box.left,34,'万元');
+  text(s,box.left,34,chartUnit);
   const english=global.YoushuI18n?.language==='en';
   const format=v=>global.YoushuI18n?.text(money(v))??money(v);
   s.setAttribute('aria-label',groups.map(g=>english
@@ -358,5 +361,8 @@ function allocation(container,incomeGroups,costGroups,onSelect,options={}){
   s.setAttribute('aria-label',`${labels.income} ${money(inTotal)}，${labels.cost} ${money(outTotal)}，${net>=0?labels.surplus:labels.shortfall} ${money(Math.abs(net))}。`);
   return s;
 }
-global.YoushuTemplateCharts={monthly,donut,forecast,receivables,allocation};
+return {monthly,donut,forecast,receivables,allocation};
+}
+const cnyCharts=forCurrency('CNY'),usdCharts=forCurrency('USD');
+global.YoushuTemplateCharts={...cnyCharts,forCurrency:code=>code==='USD'?usdCharts:cnyCharts};
 })(globalThis);

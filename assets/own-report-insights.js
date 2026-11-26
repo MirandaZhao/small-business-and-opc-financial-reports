@@ -11,7 +11,6 @@
   const round=n=>Math.round(n*100)/100;
   const sum=(rows,get)=>round(rows.reduce((n,r)=>n+(finite(get(r))?get(r):0),0));
   const clamp=n=>Math.max(0,Math.min(100,n));
-  const cash=n=>finite(n)?'¥'+n.toLocaleString('zh-CN',{maximumFractionDigits:2}):'待补充';
   const pct=n=>finite(n)?(n*100).toFixed(1)+'%':'待补充';
   const inflow=r=>finite(r.inflow)?Math.max(0,r.inflow):0,outflow=r=>finite(r.outflow)?Math.max(0,r.outflow):0;
   const magnitude=r=>inflow(r)+outflow(r)|| (finite(r.amount)?Math.abs(r.amount):0);
@@ -37,6 +36,7 @@
     return candidates.sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name,'zh-CN'));
   }
   function build(model={}){
+    const cash=n=>finite(n)?(model.currency==='USD'?'USD ':'¥')+n.toLocaleString('zh-CN',{maximumFractionDigits:2}):'待补充';
     const eligible=(model.transactions||[]).filter(r=>inflow(r)+outflow(r)>0),raw=(model.rawTransactions||[]).concat(model.neutralTransactions||[],model.zeroTransactions||[]);
     const rawRows=raw.length?raw:eligible,recordOnly=!eligible.length&&rawRows.length>0,rows=recordOnly?rawRows:eligible;
     const incomeRows=eligible.filter(r=>inflow(r)>0),expenseRows=eligible.filter(r=>outflow(r)>0),income=sum(incomeRows,inflow),expense=sum(expenseRows,outflow),gross=round(income+expense);

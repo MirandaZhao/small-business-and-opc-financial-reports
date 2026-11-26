@@ -236,6 +236,7 @@
     var errors=[],warnings=[];
     function problem(field,code,message){errors.push({row:0,field:field,code:code,message:message});}
     if(!project||typeof project!=='object'||Array.isArray(project))return{valid:false,errors:[{row:0,field:'',code:'INVALID_PROJECT',message:'项目文件格式无效。'}],warnings:warnings};
+    if(project.currency!==undefined&&project.currency!=='USD'&&project.currency!=='CNY')problem('currency','INVALID_CURRENCY','账本币种无效。');
     if(project.schemaVersion!==1)problem('schemaVersion','INVALID_VERSION','项目文件版本不支持。');
     if(typeof project.company!=='string'||project.company.length>200)problem('company','INVALID_COMPANY','企业名称必须为不超过 200 字符的文本。');
     if(project.openingCash!==null)try{if(typeof project.openingCash!=='number')fault('项目期初现金必须为数值或 null。','INVALID_TYPE');parseMoney(project.openingCash);}catch(e){problem('openingCash',e.code,e.message);}
@@ -254,6 +255,7 @@
       rows.forEach(function(r,i) {
         if(!r||typeof r!=='object') return;
         var prefix=kind+'['+i+'].';
+        if(r.currency!==undefined&&r.currency!==(project.currency||'CNY'))problem(prefix+'currency','CURRENCY_MISMATCH','来源记录币种与账本币种不一致。');
         var numeric=kind==='cash'?['inflow','outflow']:kind==='profit'?['revenue','cost','expenses','tax']:kind==='ar'?['amount','received']:BALANCE_FIELDS;
         numeric.forEach(function(f){if(typeof r[f]!=='number')problem(prefix+f,'INVALID_TYPE','项目金额必须为数值。');else if(Number.isFinite(r[f]))aggregateMagnitude+=Math.abs(r[f]);});
         if(kind==='cash'&&['operating','investing','financing','transfer'].indexOf(r.activity)<0)problem(prefix+'activity','INVALID_ACTIVITY','项目活动分类无效。');
@@ -281,7 +283,7 @@
     if(total>MAX_ROWS*2)problem('','LIMIT_EXCEEDED','项目合计最多支持 100,000 条数据。');
     return{valid:errors.length===0,errors:errors,warnings:warnings};
   }
-  /** Report money is CNY; netMargin is a fraction (0.2 = 20%). Monthly figures
+  /** Report amounts use the currency of the ledger; netMargin is a fraction (0.2 = 20%). Monthly figures
    * are restricted to asOf. closingCash is null without openingCash. Opening
    * cash means the balance immediately before the first imported transaction.
    * This engine never infers accounting profit from cash or fabricates balances. */
@@ -310,7 +312,7 @@
     var accountMap=new Map();cash.forEach(function(r){if(!accountMap.has(r.account))accountMap.set(r.account,{name:r.account,cashIn:0,cashOut:0,net:0});var a=accountMap.get(r.account);a.cashIn=round(a.cashIn+r.inflow);a.cashOut=round(a.cashOut+r.outflow);a.net=round(a.cashIn-a.cashOut);});
     // Source balances are reconciliation anchors only. Never use them to
     // fabricate project openingCash, closingCash or cash runway.
-    var accountChecks=new Map();
+    var accountChecks=new Map(),unit=project.currency==='USD'?' USD':' 元';
     cash.map(function(r,index){return{record:r,index:index};}).sort(function(a,b){return a.record.date.localeCompare(b.record.date)||a.index-b.index;}).forEach(function(item) {
       var r=item.record;
       if(!accountChecks.has(r.account))accountChecks.set(r.account,{movement:0,anchor:null,anchorRow:0,consistent:true});
@@ -320,7 +322,7 @@
         var impliedOpening=round(r.balance-check.movement);
         if(check.anchor===null) {check.anchor=impliedOpening;check.anchorRow=r.sourceRow||0;}
         else if(Math.abs(round(impliedOpening-check.anchor))>0.01) {
-          warnings.push({row:r.sourceRow||0,field:'balance',code:'SOURCE_BALANCE_MISMATCH',message:r.account+' 在 '+r.date+' 的流水余额与已导入收支不连续（差额 '+round(impliedOpening-check.anchor)+' 元）。请核对漏行、重复记录、收支方向及同日交易顺序。'});
+          warnings.push({row:r.sourceRow||0,field:'balance',code:'SOURCE_BALANCE_MISMATCH',message:r.account+' 在 '+r.date+' 的流水余额与已导入收支不连续（差额 '+round(impliedOpening-check.anchor)+unit+'）。请核对漏行、重复记录、收支方向及同日交易顺序。'});
           check.consistent=false;
         }
       }
@@ -328,16 +330,16 @@
     var checks=Array.from(accountChecks.values());
     if(project.openingCash!==null&&checks.length&&checks.every(function(c){return c.anchor!==null&&c.consistent;})) {
       var sourceOpening=round(checks.reduce(function(sum,c){return sum+c.anchor;},0));
-      if(Math.abs(round(sourceOpening-project.openingCash))>0.01)warnings.push({row:0,field:'openingCash',code:'OPENING_BALANCE_MISMATCH',message:'根据各账户流水余额反推的期初合计为 '+sourceOpening+' 元，与填写的期初现金相差 '+round(sourceOpening-project.openingCash)+' 元；当前报告仍按填写的期初现金计算，请核对。'});
+      if(Math.abs(round(sourceOpening-project.openingCash))>0.01)warnings.push({row:0,field:'openingCash',code:'OPENING_BALANCE_MISMATCH',message:'根据各账户流水余额反推的期初合计为 '+sourceOpening+unit+'，与填写的期初现金相差 '+round(sourceOpening-project.openingCash)+unit+'；当前报告仍按填写的期初现金计算，请核对。'});
     }
     var transferNet=round(cash.filter(function(r){return r.activity==='transfer';}).reduce(function(sum,r){return sum+r.inflow-r.outflow;},0));
-    if(transferNet!==0)warnings.push({row:0,field:'cash',code:'UNBALANCED_TRANSFERS',message:'内部转账净额为 '+transferNet+' 元，请检查是否缺少另一账户流水；已保留实际现金变动且不计入经营收支。'});
+    if(transferNet!==0)warnings.push({row:0,field:'cash',code:'UNBALANCED_TRANSFERS',message:'内部转账净额为 '+transferNet+unit+'，请检查是否缺少另一账户流水；已保留实际现金变动且不计入经营收支。'});
     if(project.profit.some(function(r){return r.month===asOf.slice(0,7)&&monthEnd(r.month)>asOf;}))warnings.push({row:0,field:'profit',code:'PARTIAL_MONTH_PROFIT_EXCLUDED',message:'截止日在月中；当月账务资料是整月汇总，无法拆到具体日，因此本期未纳入当月利润。选择月末可纳入该月。'});
     if(monthly.length&&cash.length&&monthly[monthly.length-1].transactionCount===0)warnings.push({row:0,field:'cash',code:'LATEST_MONTH_NO_CASH_RECORDS',message:'截止月份没有导入现金流水；图中该月仅表示当前文件未提供交易记录，不证明企业没有收支。现金推演需核对实际基准月份。'});
     if(project.cash.some(function(r){return r.date>asOf;}))warnings.push({row:0,field:'asOf',code:'FUTURE_ROWS_EXCLUDED',message:'截至日期之后的现金记录未计入本期报告。'});
     if(project.openingCash===null)warnings.push({row:0,field:'openingCash',code:'MISSING_OPENING_CASH',message:'未填写期初现金，仅显示收支变化；账户余额和现金可支撑月数暂不计算。'});
     if(project.ar.length)warnings.push({row:0,field:'ar',code:'AR_SNAPSHOT',message:'应收数据按导入时已收金额计算；历史截止日无法反推过去的回款状态。'});
-    return{company:project.company,asOf:asOf,months:months,monthly:monthly,totals:totals,latest:monthly.length?monthly[monthly.length-1]:null,ar:ar,balance:balance,incomeGroups:groups('counterparty','inflow'),costGroups:groups('category','outflow'),accounts:Array.from(accountMap.values()),warnings:warnings};
+    return{company:project.company,currency:project.currency||'CNY',asOf:asOf,months:months,monthly:monthly,totals:totals,latest:monthly.length?monthly[monthly.length-1]:null,ar:ar,balance:balance,incomeGroups:groups('counterparty','inflow'),costGroups:groups('category','outflow'),accounts:Array.from(accountMap.values()),warnings:warnings};
   }
   function safeCsv(matrix) {
     if(!Array.isArray(matrix))fault('导出内容须为表格。','INVALID_CSV');

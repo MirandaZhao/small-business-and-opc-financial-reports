@@ -3,6 +3,8 @@
   'use strict';
 
   const text = {
+    '美国银行月结单的来源记录与账户汇总不一致。':'The entries do not match the account summary on the Bank of America statement.',
+    '来源记录币种与账本币种不一致。':'The source records and the ledger use different currencies.',
     "补录资料类型不正确。":"Unsupported supplementary record type.",
     "补录字段格式不正确。":"Invalid supplementary field format.",
     "账户余额格式不正确。":"Invalid account balance format.",
@@ -373,7 +375,7 @@
     '查看我的报告':'View my report',
     '添加我的账单':'Add my statements',
     '把账单放进来，接着记':'Add statements to your ledger',
-    '微信、支付宝、银行流水可以陆续添加，也可一次选择多份。已有数据会保留。支持 CSV、Excel 和 PDF。':'Add one or more WeChat Pay, Alipay or bank exports in CSV, Excel or PDF format. Existing records stay in your ledger.',
+    '支持微信、支付宝和银行的 CSV、Excel 或 PDF，可一次添加多份。美国银行（Bank of America）美元支票账户请选择文字版月结单 PDF，美元和人民币需分账本导入。':'Add one or more WeChat Pay, Alipay or bank files in CSV, Excel or PDF format. For Bank of America USD checking, select the original text-based monthly PDFs. Keep USD and CNY in separate ledgers.',
     '账户名称（可选）':'Account name (optional)',
     '同一平台有多个账户时，分别填写名称':'Use a distinct name for each account on the same platform',
     '也可拖入多份文件 · 每份最大 20 MB':'Or drop files here · Up to 20 MB per file',
@@ -732,7 +734,17 @@
   const lookup = value => text[value] || value;
   const translate=value=>globalThis.YoushuI18n.text(value);
   const translateIssues=issues=>issues.replace(/。；/g,'。\n').split('\n').map(translate).join(' ');
+  Object.assign(text,{
+    '一个账本只能使用一种币种。请先下载当前账本备份，然后在空账本中导入另一种币种的账单。':'Each ledger uses one currency. Download a backup of the current ledger, then import the other currency into an empty ledger.',
+    '账本币种无效。':'The ledger currency is invalid.'
+  });
   const patterns = [
+    [/^(.+)（美元）$/, (original,label)=>{
+      const inYuan=translate(label+'（元）');
+      if(inYuan.includes('(CNY)'))return inYuan.replace('(CNY)','(USD)');
+      const localized=translate(label);
+      return localized!==label?localized+' (USD)':original;
+    }],
     [/^按已导入流水推算至 (.+)$/, (_,date)=>'Estimated through '+date+' using imported transactions'],
     [/^已自动识别(微信|支付宝)原始账单，(.+)。$/, (_,platform,message) => (platform==='微信'?'WeChat Pay':'Alipay')+' statement recognized. '+translate(message)],
     [/^已识别为(微信|支付宝)账单，但有 (\d+) 项需要核对。([\s\S]+)$/, (_,platform,n,details) => (platform==='微信'?'WeChat Pay':'Alipay')+' statement recognized. Issues to review: '+n+'. '+translateIssues(details)],
@@ -747,9 +759,9 @@
     [/^同一列不能同时对应 (.+) 和 (.+)，请核对列映射。$/, (_,left,right)=>'Map '+left+' and '+right+' to separate columns.'],
     [/^项目必须包含 (\w+) 数组。$/, (_,field)=>'The ledger must contain a '+field+' array.'],
     [/^保存的计算结果与来源金额不一致，请核对 (.+)；应以来源数据重新计算。$/, (_,field)=>'The saved '+field+' differs from the source amounts. Recalculate it from the source records.'],
-    [/^(.+) 在 (\d{4}-\d{2}-\d{2}) 的流水余额与已导入收支不连续（差额 (.+?) 元）。请核对漏行、重复记录、收支方向及同日交易顺序。$/, (_,account,date,gap)=>'The balance for '+account+' on '+date+' differs from the imported cash movements by CNY '+gap+'. Check for missing or duplicate transactions, payment directions and same-day ordering.'],
-    [/^内部转账净额为 (.+?) 元，请检查是否缺少另一账户流水；已保留实际现金变动且不计入经营收支。$/, (_,v)=>'Internal transfers net to CNY '+v+'. Check for missing transactions from the other account. Actual cash movements are maintained separately from operating cash flows.'],
-    [/^根据各账户流水余额反推的期初合计为 (.+?) 元，与填写的期初现金相差 (.+?) 元；当前报告仍按填写的期初现金计算，请核对。$/, (_,v,gap)=>'Opening balances inferred from the statements total CNY '+v+', a difference of CNY '+gap+' from the entered opening cash. The report uses the entered amount. Check these figures.'],
+    [/^(.+) 在 (\d{4}-\d{2}-\d{2}) 的流水余额与已导入收支不连续（差额 (.+?) (元|美元|USD)）。请核对漏行、重复记录、收支方向及同日交易顺序。$/, (_,account,date,gap,unit)=>'The balance for '+account+' on '+date+' differs from the imported cash movements by '+(unit==='元'?'CNY ':'USD ')+gap+'. Check for missing or duplicate transactions, payment directions and same-day ordering.'],
+    [/^内部转账净额为 (.+?) (元|美元|USD)，请检查是否缺少另一账户流水；已保留实际现金变动且不计入经营收支。$/, (_,v,unit)=>'Internal transfers net to '+(unit==='元'?'CNY ':'USD ')+v+'. Check for missing transactions from the other account. Actual cash movements are maintained separately from operating cash flows.'],
+    [/^根据各账户流水余额反推的期初合计为 (.+?) (元|美元|USD)，与填写的期初现金相差 (.+?) (?:元|美元|USD)；当前报告仍按填写的期初现金计算，请核对。$/, (_,v,unit,gap)=>'Opening balances inferred from the statements total '+(unit==='元'?'CNY ':'USD ')+v+', a difference of '+(unit==='元'?'CNY ':'USD ')+gap+' from the entered opening cash. The report uses the entered amount. Check these figures.'],
     [/^文件过大：本次最多读取 (.+?) 行、40 万个单元格。请按月份拆分文件后重试。$/, (_,n) => 'The limit is '+n+' rows and 400,000 cells. Split the file by month.'],
     [/^工作表“(.+)”超过 20,000 行或 200 列。请删除无关空白区域，或按月份拆分。$/, (_,sheet) => 'Worksheet “'+sheet+'” exceeds 20,000 rows or 200 columns. Remove unused blank areas or split it by month.'],
     [/^Excel 含 (\d+) 个公式单元格；仅读取文件中已保存的计算结果，不运行公式或宏。请先在 Excel 中重新计算并保存，再核对导入金额。$/, (_,n)=>'The workbook contains '+n+' formula cells. Only saved results are read. Recalculate and save the workbook in Excel, then check the imported amounts.'],
@@ -811,8 +823,8 @@
     [/^预览前 (\d+) 行，共 (\d+) 行。导入时检查全部记录。$/, (_,shown,total) => 'Showing '+shown+' of '+total+' rows. All records are checked at import.'],
     [/^(现金流水|账务利润|应收明细|资产负债|账单)原始明细 · (\d+) 条$/, (_,kind,n) => lookup(kind)+' · '+n+' source record'+(n==='1'?'':'s')],
     [/^有数 · 本地报告快照 · 截至 (.*?)。本文件包含财务数据，请自行妥善保存。$/, (_,date) => 'Youshu · Local report snapshot as of '+date+'. This file contains financial data. Store it securely.'],
-    [/^已识别(招商银行|北京银行) PDF，请核对后点击“确认并生成报告”。$/, (_,bank) => lookup(bank)+' PDF recognized. Review it, then select Confirm and create report.'],
-    [/^(招商银行|北京银行) PDF · 待确认$/, (_,bank) => lookup(bank)+' PDF · Awaiting review'],
+    [/^已识别(招商银行|北京银行|Bank of America) PDF，请核对后点击“确认并生成报告”。$/, (_,bank) => lookup(bank)+' PDF recognized. Review it, then select Confirm and create report.'],
+    [/^(招商银行|北京银行|Bank of America) PDF · 待确认$/, (_,bank) => lookup(bank)+' PDF · Awaiting review'],
     [/^逐笔余额连续性已核对：(\d+) 处相邻余额一致。$/, (_,n) => 'Running balances checked across '+n+' consecutive pairs.'],
     [/^收入 (.+?) · 支出 (.+?) · 末笔余额 (.+)$/, (_,a,b,c) => 'Receipts '+a+' · Payments '+b+' · Closing balance '+c],
     [/^首笔交易前余额 (.+?) 是根据流水反推的核对值，不会自动填写为整个账本的期初现金。本格式没有流水号，不会按同日同金额误删记录。$/, (_,amount) => 'The opening balance of '+amount+' was inferred from this statement for reconciliation. It does not set the ledger opening balance. The format has no transaction IDs, so matching dates and amounts alone do not remove entries.'],

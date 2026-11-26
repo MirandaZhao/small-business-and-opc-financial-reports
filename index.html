@@ -445,7 +445,7 @@
 #ys-report.rt-own .rt-health-scale>i:nth-child(3){width:33.333%;background:#8cac9c}
 
 </style>
-<link rel="stylesheet" href="assets/language.css?v=language-link-1">
+<link rel="stylesheet" href="assets/language.css?v=boa-usd-1">
 </head>
 <body><main>
 <section id="ys-app"><p>正在打开有数。若长时间停留，请完整解压下载包，保留 assets 文件夹。</p></section>
@@ -972,7 +972,7 @@ body.q-modal-open{overflow:hidden}#qingzhang-v4 dialog{border:1px solid #d6e1d8;
 <dialog id="q2-detail-dialog" aria-labelledby="q2-detail-title"><div class="q-detail-top"><span class="q-detail-eyebrow">经营明细 · 示例数据</span><button type="button" id="q2-detail-close" aria-label="关闭明细">关闭 <span aria-hidden="true">×</span></button></div><div id="q2-detail-body"></div></dialog>
 <footer class="q-footer">有数 · 一页看清经营 ｜ OPC AI企业合成场景 · 经营图表按现金，利润与报表按账务 · 不代表真实经营成效。</footer>
 
-<script src="assets/report-statements.js?v=statement-locales-2"></script>
+<script src="assets/report-statements.js?v=boa-usd-1"></script>
 <script>
 (()=>{
 const root=document.getElementById('qingzhang-v4'),$=s=>root.querySelector(s),money=v=>'¥'+Math.round(v).toLocaleString('zh-CN');
@@ -1309,28 +1309,29 @@ new ResizeObserver(()=>{const box=forecastPlot.getBoundingClientRect(),size=box.
 // Offline exports use native chart hover labels.
 (()=>{const root=document.getElementById('qingzhang-v4');function labelCharts(){root.querySelectorAll('[data-tooltip]').forEach(el=>{if(el.namespaceURI==='http://www.w3.org/2000/svg'){if(!el.querySelector('title')){const title=document.createElementNS('http://www.w3.org/2000/svg','title');title.textContent=el.dataset.tooltip;el.appendChild(title);}}else{el.title=el.dataset.tooltip;}});}labelCharts();root.addEventListener('input',labelCharts);root.addEventListener('change',labelCharts);new ResizeObserver(labelCharts).observe(root);})();
 </script>
-<script src="assets/data-engine.js?v=bank-pdf-preview-2"></script>
-<script src="assets/file-readers.js?v=bank-pdf-preview-1"></script>
+<script src="assets/data-engine.js?v=boa-usd-1"></script>
+<script src="assets/boa-import.js?v=boa-usd-1"></script>
+<script src="assets/file-readers.js?v=boa-usd-1"></script>
 <script src="assets/allocation.js?v=0.2.1"></script>
 <script src="assets/wechat-import.js?v=wechat-preview-1"></script>
 <script src="assets/alipay-import.js?v=alipay-preview-1"></script>
-<script src="assets/bank-import.js?v=bank-pdf-preview-2"></script>
-<script src="assets/ledger.js?v=bank-pdf-preview-2"></script>
+<script src="assets/bank-import.js?v=boa-usd-1"></script>
+<script src="assets/ledger.js?v=boa-usd-1"></script>
 <script src="assets/ledger-storage.js?v=clean-release-031"></script>
-<script src="assets/pdf-import.js?v=bank-pdf-preview-2"></script>
+<script src="assets/pdf-import.js?v=boa-usd-1"></script>
 <script src="assets/supplement-data.js?v=cash-history-20261101"></script>
-<script src="assets/own-report-cash.js?v=cash-history-20261101"></script>
-<script src="assets/report-model.js?v=cash-history-20261101"></script>
-<script src="assets/report-charts.js?v=statement-locales-2"></script>
+<script src="assets/own-report-cash.js?v=boa-usd-1"></script>
+<script src="assets/report-model.js?v=boa-usd-1"></script>
+<script src="assets/report-charts.js?v=boa-usd-1"></script>
 <script src="assets/random-scenario-generator.js?v=random-details-1"></script>
 <script src="assets/random-scenario-insights.js?v=refund-income-20261101"></script>
-<script src="assets/own-report-insights.js?v=cash-history-20261101"></script>
-<script src="assets/report-view.js?v=statement-locales-2"></script>
+<script src="assets/own-report-insights.js?v=boa-usd-1"></script>
+<script src="assets/report-view.js?v=boa-usd-1"></script>
 <script src="assets/fixed-sample-project.js?v=global-period-20261031"></script>
-<script src="assets/supplement-ui.js?v=statement-locales-2"></script>
-<script src="assets/en-report.js?v=statement-locales-2"></script>
-<script src="assets/en-workspace.js?v=statement-locales-2"></script>
+<script src="assets/supplement-ui.js?v=boa-usd-1"></script>
+<script src="assets/en-report.js?v=boa-usd-1"></script>
+<script src="assets/en-workspace.js?v=boa-usd-1"></script>
 <script src="assets/en-examples.js"></script>
-<script src="assets/language.js?v=statement-locales-2"></script>
-<script src="assets/workspace.js?v=statement-locales-2"></script>
+<script src="assets/language.js?v=boa-usd-1"></script>
+<script src="assets/workspace.js?v=boa-usd-1"></script>
 </body></html>

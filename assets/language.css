@@ -12,7 +12,7 @@
 #ys-app .ys-language-switch:hover span,#ys-app .ys-language-switch:focus-visible span {
   text-decoration-color:currentColor;text-decoration-thickness:2px;
 }
-html:lang(en) #ys-report [data-i18n-cny]+small {display:none}
+html:lang(en) #ys-report [data-i18n-amount]+small {display:none}
 html:lang(en) #ys-report .rt-overview-kpis {grid-template-columns:repeat(3,minmax(0,1fr))}
 html:lang(en) #ys-report .rt-overview-kpi .rt-kpi-value {font-size:clamp(16px,2.2vw,26px);overflow-wrap:anywhere}
 html:lang(en) #ys-report .rt-heading,html:lang(en) #ys-report .rt-row {flex-wrap:wrap}
@@ -31,4 +31,4 @@ html:lang(en) #ys-report .rt-heading .rt-intro {white-space:normal}
   #ys-app .ys-nav-controls .ys-nav-tabs {gap:3px}
   #ys-app .ys-nav-controls .ys-nav-tabs button {font-size:12px;padding:6px;white-space:normal}
 }
-#ys-report .rt-kpi-value > [data-i18n-cny] {font-size:inherit;letter-spacing:inherit}
+#ys-report .rt-kpi-value > [data-i18n-amount] {font-size:inherit;letter-spacing:inherit}

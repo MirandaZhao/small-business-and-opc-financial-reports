@@ -23,7 +23,7 @@
     '全部为虚构示例':'Fictional example','再来一个':'Another example','再来一个随机报告':'Explore another example',
     '报告期间':'Reporting period','最近1个月':'Latest month','最近3个月':'Last 3 months','最近6个月':'Last 6 months','最近12个月':'Last 12 months','全部月份':'All months',
     '有数 · 数据留在本机':'Youshu · Data stays on this device','我的账本':'My ledger',
-    '本期':'Selected period','人民币':'CNY','元':'CNY','万':'× 10,000','万元':'CNY × 10,000','个月':' months',
+    '本期':'Selected period','美元':'USD','万美元':'USD × 10,000','人民币':'CNY','元':'CNY','万':'× 10,000','万元':'CNY × 10,000','个月':' months',
     '当前':'Current view','下载报告':'Download report','打印 / PDF':'Print / PDF','金额单位：万元':'Amounts in CNY × 10,000',
     '有数 · 我的企业经营报告':'Youshu · Business financial report'
   };
@@ -111,7 +111,7 @@
       if (out === undefined) {
         let prepared = source.replace(/(\d{4})年(1[0-2]|0?[1-9])月(?:(3[01]|[12]\d|0?[1-9])日)?/g,
           (_,y,m,d)=>months[Number(m)-1]+' '+(d?Number(d)+', ':'')+y)
-          .replace(/(-?[\d,]+(?:\.\d+)?)\s*万(?:元)?/g,(_,n)=>'CNY '+number.format(Number(n.replace(/,/g,''))*10000));
+          .replace(/(-?[\d,]+(?:\.\d+)?)\s*万(美元|元)?/g,(_,n,unit)=>(unit==='美元'?'USD ':'CNY ')+number.format(Number(n.replace(/,/g,''))*10000));
         if (/ · |\n/.test(prepared)) {
           const split = prepared.split(/( · |\n)/);
           prepared = split.map((part,i)=>i%2 ? part : lookup(part.trim(),sample)).join('');
@@ -148,9 +148,9 @@
     const shown=remember(nodes,node,node.data,original=>{
       const field=el.closest('[data-i18n-field]')?.dataset.i18nField;
       if(field) return sourceLabel(original,field);
-      const amount=el.getAttribute('data-i18n-cny');
-      if (amount!==null && language==='en') return 'CNY '+number.format(Number(amount));
-      if (language==='en' && el.tagName==='SMALL' && el.previousElementSibling?.hasAttribute('data-i18n-cny')) return '';
+      const amount=el.getAttribute('data-i18n-amount');
+      if (amount!==null && language==='en') return (el.dataset.currency==='USD'?'USD ':'CNY ')+number.format(Number(amount));
+      if (language==='en' && el.tagName==='SMALL' && el.previousElementSibling?.hasAttribute('data-i18n-amount')) return '';
       return translate(original,isSample(el));
     });
     if (node.data!==shown) node.data=shown;

@@ -3,15 +3,17 @@
   'use strict';
   const titles={ar:'补充应收款',balance:'确认账户余额',books:'补充月度账务',plan:'补充付款计划',assets:'补充资产负债',records:'补录记录'};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const money=value=>value===null||value===undefined?'未填写':'¥'+Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2});
   const copy=value=>JSON.parse(JSON.stringify(value));
   const makeId=()=> 'supp-'+(root.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
   const field=(label,name,value,type='text',hint='')=>`<label class="ys-sup-field"><span>${label}</span><input name="${name}" type="${type}" value="${esc(value)}" ${type==='number'?'step="0.01" min="0" inputmode="decimal" placeholder="不知道可留空"':type==='text'?'maxlength="200"':''}>${hint?`<small>${hint}</small>`:''}</label>`;
-  const amount=(label,name,value,hint='')=>field(label+'（元）',name,value,'number',hint);
   const tick=(label,name,checked)=>`<label class="ys-sup-check"><input name="${name}" type="checkbox" ${checked?'checked':''}><span>${label}</span></label>`;
   const assets=['cash','receivables','inventory','fixedAssets','otherAssets','payables','taxPayable','debt','otherLiabilities','capital','retainedEarnings'];
   const assetLabels={cash:'账户现金',receivables:'应收款',inventory:'存货',fixedAssets:'设备等固定资产净值',otherAssets:'其他资产',payables:'应付款',taxPayable:'应交税费',debt:'借款',otherLiabilities:'其他负债',capital:'投入本金',retainedEarnings:'留存收益'};
   function create(host,options={}){
+    const usd=()=>options.getProject()?.currency==='USD';
+    const unit=()=>usd()?'（美元）':'（元）';
+    const money=value=>value==null?'未填写':(usd()?'USD ':'¥')+Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2});
+    const amount=(label,name,value,hint='')=>field(label+unit(),name,value,'number',hint);
     if(!host)throw Error('补录界面缺少容器。');
     const S=root.YoushuSupplements;
     if(!S)throw Error('补录数据组件尚未加载。');
@@ -93,7 +95,7 @@
           html+=field('准备付给谁','payee',data.payee)+amount('预计付款','amount',data.amount)+field('预计付款日','date',data.date,'date')+'<details class="ys-sup-more"><summary>更多信息（可选）</summary>'+field('付款事项','category',data.category)+tick('每月重复这笔付款','repeat',data.repeat)+'</details>'+footer('只用于未来现金安排，不计入已经发生的支出。')+'</form>';
         }else if(type==='assets'){
           html+=field('资料日期','date',data.date,'date')+'<p class="ys-sup-note">可以先记下已知金额。完整且平衡后再生成资产负债表。</p>';
-          for(const [title,keys] of [['资产',['cash','receivables','inventory','fixedAssets','otherAssets']],['负债',['payables','taxPayable','debt','otherLiabilities']],['本金与留存',['capital','retainedEarnings']]])html+=`<details class="ys-sup-more" ${title==='资产'?'open':''}><summary>${title}</summary>${keys.map(key=>key==='retainedEarnings'?field(assetLabels[key]+'（元）',key,data[key],'number','累计亏损时可以填负数').replace('min="0"',''):amount(assetLabels[key],key,data[key])).join('')}</details>`;
+          for(const [title,keys] of [['资产',['cash','receivables','inventory','fixedAssets','otherAssets']],['负债',['payables','taxPayable','debt','otherLiabilities']],['本金与留存',['capital','retainedEarnings']]])html+=`<details class="ys-sup-more" ${title==='资产'?'open':''}><summary>${title}</summary>${keys.map(key=>key==='retainedEarnings'?field(assetLabels[key]+unit(),key,data[key],'number','累计亏损时可以填负数').replace('min="0"',''):amount(assetLabels[key],key,data[key])).join('')}</details>`;
           html+=footer('不知道可留空，没有发生请填 0；不会修改原始流水。')+'</form>';
         }
       }

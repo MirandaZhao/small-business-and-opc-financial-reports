@@ -32,7 +32,8 @@
   function balanceContext(project,options={}){
     const scope=options.account||'',asOf=options.asOf||sourceEnd(project,null,scope)||project.asOf||'',all=sourceRows(project).filter(r=>(!scope||r.account===scope)&&validDate(r.date)&&(!asOf||r.date<=asOf));
     const imports=(project.ledger?.imports||[]).filter(b=>b.kind==='cash'),manual=(project.supplements?.records||[]).filter(r=>r.type==='balance'&&validDate(r.data?.date)&&(!asOf||r.data.date<=asOf));
-    const names=[...new Set(all.map(r=>r.account).concat(manual.flatMap(r=>r.data.accounts.map(a=>a.account))).filter(a=>a&&(!scope||a===scope)))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+    const boaAccounts=imports.map(b=>b.bankStatement).filter(s=>s?.format==='boa-checking-pdf-v1'&&s.start<=asOf).map(s=>s.account);
+    const names=[...new Set(all.map(r=>r.account).concat(boaAccounts,manual.flatMap(r=>r.data.accounts.map(a=>a.account))).filter(a=>a&&(!scope||a===scope)))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
     const candidates=new Map(names.map(a=>[a,[]]));const add=(account,row)=>{if(candidates.has(account))candidates.get(account).push(row);};
     // Verified bank exports carry an explicit statement coverage date. A lack
     // of transactions after its last row is meaningful only inside that file.
@@ -40,6 +41,14 @@
     for(const batch of imports){
       const meta=batch.bankStatement;if(!meta||meta.balanceErrors?.length||!validDate(meta.end))continue;
       const account=meta.account||batch.accountScope;if(scope&&account!==scope)continue;
+      if(meta.format==='boa-checking-pdf-v1'){
+        if(!meta.balanceChecked||meta.start>asOf)continue;
+        // An in-period snapshot may be estimated from the opening balance
+        // and posted movements. Only the printed ending balance is a close.
+        const ended=meta.end<=asOf,date=ended?meta.end:addDays(meta.start,-1);
+        add(account,{account,date,amount:ended?meta.closingBalance:meta.openingBalance,source:'账单识别',sourceName:batch.name,verified:true,issue:'',coverageStart:meta.start,coverageEnd:meta.end});
+        coveredImports.add(batch.id);continue;
+      }
       const rows=ordered((batch.rows||[]).concat(meta.zeroRows||[]).filter(r=>r.date<=asOf));if(!rows.length)continue;
       const check=checkChain(rows),last=[...rows].reverse().find(r=>finite(r.balance));
       if(!last)continue;

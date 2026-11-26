@@ -1,6 +1,7 @@
 /* Youshu local file readers. Financial files never leave this browser. */
 (function (global) {
   'use strict';
+  const boa = typeof module === 'object' && module.exports ? require('./boa-import.js') : global.YoushuBoa;
   const LIMITS = Object.freeze({ bytes: 20 * 1024 * 1024, pages: 20, ocrPages: 5, rows: 20000, columns: 200, cells: 400000 });
   const script = typeof document !== 'undefined' ? document.currentScript : null;
   const base = script && script.src ? new URL('vendor/', script.src).href : 'assets/vendor/';
@@ -194,15 +195,18 @@
       pdf = await task.promise;
       if (pdf.numPages > LIMITS.pages) throw failure('PDF_PAGE_LIMIT', 'PDF 共 ' + pdf.numPages + ' 页，本次最多读取 20 页。请按月份拆分后重试。');
       const warnings = ['PDF 内容是自动提取的候选数据；请核对日期、收支方向、金额和余额后再生成报告。页眉、合计、重复表头可能需要在预览中删除。'];
-      const sheets = [], text = []; let ocrCount = 0;
+      const sheets = [], text = []; let ocrCount = 0, boaStatement = false;
       for (let n = 1; n <= pdf.numPages; n++) {
         progress(options, '正在读取 PDF 第 ' + n + ' / ' + pdf.numPages + ' 页', (n - 1) / pdf.numPages, { page: n, total: pdf.numPages });
         const page = await pdf.getPage(n), content = await page.getTextContent();
         const positioned = textItemsToRows(content.items, true);
         let rows = positioned.rows, rowPositions = positioned.rowPositions, raw = rows.map(row => row.join('\t')).join('\n'), source = 'text';
         const dates = raw.match(/(?:20\d{2}[-/.年]\d{1,2}[-/.月]\d{1,2}|20\d{6})/g) || [];
+        // BOA includes logos and offers on text-only notices and monthly summary
+        // pages. The bank adapter verifies page numbers and all printed totals.
+        if (n === 1) boaStatement = !!boa?.recognizes(rows);
         let hasImages = false;
-        if (raw.replace(/\s/g, '').length < 80 || dates.length < 2) {
+        if (!boaStatement && (raw.replace(/\s/g, '').length < 80 || dates.length < 2)) {
           const ops = await page.getOperatorList();
           const kinds = [global.pdfjsLib.OPS.paintImageXObject, global.pdfjsLib.OPS.paintInlineImageXObject, global.pdfjsLib.OPS.paintImageMaskXObject];
           hasImages = ops.fnArray.some(x => kinds.includes(x));

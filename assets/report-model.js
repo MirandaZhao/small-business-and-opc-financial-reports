@@ -91,6 +91,7 @@
     const statement=statementOf(project),dates=[];
     const add=date=>{if(/^\d{4}-(0[1-9]|1[0-2])(?:-\d{2})?$/.test(String(date||'')))dates.push(String(date).slice(0,7));};
     for(const row of (project.cash||[]).concat(statement?.neutralRows||[],statement?.zeroRows||[],project.balance||[]))add(row.date);
+    for(const entry of project.ledger?.imports||[]){const b=entry.bankStatement;if(b?.format==='boa-checking-pdf-v1'&&b.recordCount===0)add(b.end);}
     for(const row of project.profit||[])add(row.month);
     for(const row of (project.ar||[]).concat(project.invoices||[],project.costInvoices||[])){
       add(row.recognitionDate||row.invoiceDate);for(const payment of row.payments||[])add(payment.date);
@@ -112,7 +113,7 @@
   }
   function tags(kind,row,amount){
     const result=[];
-    if(amount>=5000)result.push({id:'large',label:'大额',reason:'本笔金额达到 ¥5,000'});
+    if(amount>=5000)result.push({id:'large',label:'大额',reason:row.currency==='USD'?'本笔金额达到 USD 5,000':'本笔金额达到 ¥5,000'});
     if(kind==='income'){
       const refund=refundEvidence(row);if(refund)result.push({id:'refund',label:'退款',reason:refund});
       if(row.incomeNature==='payroll'&&row.natureEvidence)result.push({id:'payroll',label:'薪酬',reason:row.natureEvidence});
@@ -282,20 +283,22 @@
     const neutralTransactions=(statement?.neutralRows||[]).filter(row=>row.date<=report.asOf),zeroTransactions=(statement?.zeroRows||[]).filter(row=>row.date<=report.asOf);
     const inMonth=row=>!options.month||row.date.slice(0,7)===options.month;
     const operating=rawTransactions.filter(row=>eligible(row)&&inMonth(row));
-    const hasCash=rawTransactions.length>0,hasStatementRecords=isStatement&&(neutralTransactions.length>0||zeroTransactions.length>0),hasFlowScope=hasCash||hasStatementRecords;
+    const silentAccounts=(statement?.bankStatements||[]).map(entry=>entry.statement).filter(b=>b.format==='boa-checking-pdf-v1'&&b.recordCount===0&&b.end<=report.asOf).map(b=>b.account);
+    const hasCash=rawTransactions.length>0||silentAccounts.length>0,hasStatementRecords=isStatement&&(neutralTransactions.length>0||zeroTransactions.length>0),hasFlowScope=hasCash||hasStatementRecords;
     const income=breakdown('income',operating,hasFlowScope),cost=breakdown('cost',operating,hasFlowScope);
     const profit=p.profit.filter(row=>D.monthEnd(row.month)<=report.asOf).map(row=>({...row,netProfit:round(row.revenue-row.cost-row.expenses-row.tax)}));
     const arRows=report.ar.rows.map(row=>({...row,termDays:row.invoiceDate?Math.round((Date.parse(row.dueDate+'T00:00:00Z')-Date.parse(row.invoiceDate+'T00:00:00Z'))/86400000):null,actualAverageDays:Number.isFinite(row.actualAverageDays)?row.actualAverageDays:null}));
     const batchRows=batch=>(batch.rows||[]).concat(batch.statement?.neutralRows||[],batch.statement?.zeroRows||[],batch.bankStatement?.zeroRows||[]);
-    const imports=(project.ledger?.imports||[]).filter(batch=>!options.account||batch.accountScope===options.account||batchRows(batch).some(row=>row.account===options.account)).map(batch=>{
+    const imports=(project.ledger?.imports||[]).filter(batch=>!options.account||batch.accountScope===options.account||batch.bankStatement?.account===options.account||batchRows(batch).some(row=>row.account===options.account)).map(batch=>{
       const rows=(batch.rows||[]).concat(batch.statement?.neutralRows||[],batch.statement?.zeroRows||[],batch.bankStatement?.zeroRows||[]),dates=rows.map(row=>row.date||row.month||row.invoiceDate).filter(Boolean).sort();
-      return {id:batch.id,name:batch.name,kind:batch.kind,sourceType:batch.sourceType,account:batch.accountScope||Array.from(new Set(rows.map(row=>row.account).filter(Boolean))).join('、'),count:rows.length,importedAt:batch.importedAt||null,start:batch.statement?.start||batch.bankStatement?.start||dates[0]||null,end:batch.statement?.end||batch.bankStatement?.end||dates.at(-1)||null};
+      return {id:batch.id,name:batch.name,kind:batch.kind,sourceType:batch.sourceType,account:batch.accountScope||batch.bankStatement?.account||Array.from(new Set(rows.map(row=>row.account).filter(Boolean))).join('、'),count:rows.length,importedAt:batch.importedAt||null,start:batch.statement?.start||batch.bankStatement?.start||dates[0]||null,end:batch.statement?.end||batch.bankStatement?.end||dates.at(-1)||null};
     });
     const latestCash=[...report.monthly].reverse().find(month=>month.transactionCount>0)||null;
     const accounts=report.accounts.slice();
+    for(const name of silentAccounts)if(!accounts.some(account=>account.name===name))accounts.push({name,cashIn:0,cashOut:0,net:0});
     for(const row of neutralTransactions.concat(zeroTransactions))if(!accounts.some(account=>account.name===row.account))accounts.push({name:row.account,cashIn:0,cashOut:0,net:0});
     const availability={source:true,cash:hasCash,profit:profit.length>0,ar:engineProject.ar.length>0,balance:report.balance!==null,closingCash:report.totals.closingCash!==null&&hasCash,forecast:!isStatement&&report.totals.closingCash!==null&&latestCash!==null&&operating.length>0,score:false};
-    const view={source,sourceUnavailable:false,hasData:hasCash||profit.length>0||p.ar.length>0||p.balance.length>0||neutralTransactions.length>0||zeroTransactions.length>0,company:report.company||'我的企业',asOf:report.asOf,report,totals:report.totals,latest:report.latest,latestCash,monthly:report.monthly,incomeGroups:report.incomeGroups,costGroups:report.costGroups,income,cost,transactions:operating,rawTransactions,neutralTransactions,zeroTransactions,ar:{...report.ar,rows:arRows},balance:report.balance,profit,imports,accounts,cashBalances:report.monthly.map(month=>({month:month.month,balance:month.closingCash})),warnings:report.warnings,statement,isStatement,scopeMonth:options.month||null,scopeTotals:{income:income.total,cost:cost.total,net:hasFlowScope?round(income.total-cost.total):null},availability};
+    const view={source,currency:report.currency,sourceUnavailable:false,hasData:hasCash||profit.length>0||p.ar.length>0||p.balance.length>0||neutralTransactions.length>0||zeroTransactions.length>0,company:report.company||'我的企业',asOf:report.asOf,report,totals:report.totals,latest:report.latest,latestCash,monthly:report.monthly,incomeGroups:report.incomeGroups,costGroups:report.costGroups,income,cost,transactions:operating,rawTransactions,neutralTransactions,zeroTransactions,ar:{...report.ar,rows:arRows},balance:report.balance,profit,imports,accounts,cashBalances:report.monthly.map(month=>({month:month.month,balance:month.closingCash})),warnings:report.warnings,statement,isStatement,scopeMonth:options.month||null,scopeTotals:{income:income.total,cost:cost.total,net:hasFlowScope?round(income.total-cost.total):null},availability};
     view.balanceHistory=(!options.account&&p.openingBalance&&!p.balance.some(row=>row.date===p.openingBalance.date)?[p.openingBalance,...p.balance]:p.balance).filter(row=>row.date<=report.asOf).map(row=>({...row}));
     view.statementInvoices=(p.invoices||[]).filter(row=>(row.recognitionDate||row.invoiceDate)<=report.asOf).map(row=>({...row}));
     view.openingDate=options.account?null:p.scenario?.openingDate||p.openingDate||null;

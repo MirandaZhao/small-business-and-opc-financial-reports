@@ -22,6 +22,24 @@
     const match=/^第(\d+)页(?:共(\d+)页)?$/.exec(value)||/^(\d+)\/(\d+)$/.exec(value);
     return match?{page:Number(match[1]),total:match[2]===undefined?null:Number(match[2])}:null;
   }
+  function validateCurrency(matrix,eligible){
+    const errors=[];
+    if(!Array.isArray(matrix)||!Array.isArray(matrix[0]))return errors;
+    const headers=matrix[0];
+    const currencyColumns=[];
+    headers.forEach((cell,index)=>{if(['币种','货币','币别','currency','currencycode','transactioncurrency'].includes(key(cell)))currencyColumns.push(index);});
+    if(!currencyColumns.length)return errors;
+    matrix.slice(1).forEach((row,index)=>{
+      if(!Array.isArray(row)||blank(row)||(eligible&&!eligible(row)))return;
+      const sourceRow=index+2;
+      currencyColumns.forEach(column=>{
+        const currency=key(row[column]);
+        if(!currency)errors.push({row:sourceRow,field:'currency',code:'PDF_CURRENCY_MISSING',message:'原表有币种列，但这笔交易的币种为空。请对照原文件补明币种后再导入。'});
+        else if(!['人民币','人民币元','cny','rmb','人民币cny','cny人民币','元','¥','￥','156'].includes(currency))errors.push({row:sourceRow,field:'currency',code:'PDF_CURRENCY',message:'币种不是可确认的人民币，不能直接计入人民币报告。'});
+      });
+    });
+    return errors;
+  }
   // Recheck the current editable matrix and selected mappings at confirmation.
   // Structural corrections never waive currency or transaction-direction checks.
   function validateMapping(matrix,mapping){
@@ -30,19 +48,14 @@
     const headers=matrix[0];mapping=mapping||D.autoMapping(headers,'cash');
     const mapped=field=>Number.isInteger(mapping[field])&&mapping[field]>=0&&mapping[field]<headers.length;
     if(!mapped('date'))return errors; // Required-column errors belong to normalize.
-    const currencyColumns=[];
-    headers.forEach((cell,index)=>{if(['币种','货币','currency'].includes(key(cell)))currencyColumns.push(index);});
+    function datedRow(row){
+      try{return !!D.parseDate(row[mapping.date]);}catch(error){return error.code==='AMBIGUOUS_DATE';}
+    }
+    errors.push(...validateCurrency(matrix,datedRow));
     matrix.slice(1).forEach((row,index)=>{
       if(!Array.isArray(row))return;
-      let dated=false;
-      try{dated=!!D.parseDate(row[mapping.date]);}catch(error){dated=error.code==='AMBIGUOUS_DATE';}
-      if(!dated)return; // Malformed rows remain for normalize to reject.
+      if(!datedRow(row))return; // Malformed rows remain for normalize to reject.
       const sourceRow=index+2;
-      currencyColumns.forEach(column=>{
-        const currency=key(row[column]);
-        if(!currency)errors.push({row:sourceRow,field:'currency',code:'PDF_CURRENCY_MISSING',message:'原表有币种列，但这笔交易的币种为空。请对照原文件补明币种后再导入。'});
-        else if(!['人民币','人民币元','cny','rmb','人民币cny','cny人民币','元','¥','￥','156'].includes(currency))errors.push({row:sourceRow,field:'currency',code:'PDF_CURRENCY',message:'币种不是可确认的人民币，不能直接计入人民币报告。'});
-      });
       if(mapped('amount')&&!mapped('inflow')&&!mapped('outflow')){
         const direction=mapped('direction')?text(row[mapping.direction]):'';
         const amount=text(row[mapping.amount]).replace(/^(?:人民币|RMB|CNY|[¥￥])\s*/i,'');
@@ -164,5 +177,5 @@
     if(priorByAccount.size>1)result.warnings.push({message:'已按账户分别核对余额，请确认账户列确实区分了不同银行账户。'});
     return result;
   }
-  return Object.freeze({prepare,validateMapping,audit});
+  return Object.freeze({prepare,validateMapping,validateCurrency,audit});
 });
