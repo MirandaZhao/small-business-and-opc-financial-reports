@@ -1,11 +1,11 @@
 # Workflow
 
-Youshu 0.3.1 uses the same report interface for fictional examples and users' own ledgers. The two datasets remain separate.
+Youshu 0.4.0 uses the same report interface for fictional examples and users' own ledgers. The two datasets remain separate.
 
 ## From data to reports
 
 1. **Select data:** Random experience uses built-in synthetic scenarios. My report accepts CSV, Excel, PDF, and supplementary records.
-2. **Read and review:** files are parsed in the browser to identify accounts, dates, counterparties, cash directions, amounts, and balances. Files requiring review are imported after user confirmation. Check PDFs for complete transaction extraction.
+2. **Read and review:** files are parsed in the browser to identify accounts, dates, counterparties, cash directions, amounts, and balances. Files requiring review are imported after user confirmation. For Bank of America USD checking PDFs, the importer reconciles each transaction section and the printed statement balances before confirmation.
 3. **Add to the ledger:** append multiple statements while retaining import sources and checking identifiable duplicates. The same payment appearing across platforms may still require manual review.
 4. **Choose the period:** summarize all months or the latest months containing data, updating the report modules together. Balances, receivables, and other point-in-time information retain their respective dates.
 5. **Calculate and display:** generate cash activity, balances, income/cost breakdowns, cash projections, receivables, insights, and financial statements supported by the supplied records. Click charts to view the corresponding details.
@@ -29,12 +29,12 @@ The software includes fictional examples and blank templates, not a personal led
 
 # 工作流程
 
-有数 0.3.1 使用同一套报告界面展示虚构示例和用户自己的账本，两类数据相互独立。
+有数 0.4.0 使用同一套报告界面展示虚构示例和用户自己的账本，两类数据相互独立。
 
 ## 数据如何生成报告
 
 1. **选择数据**：随机体验使用内置合成场景；我的报告接收 CSV、Excel、PDF 和补录资料。
-2. **读取与核对**：在浏览器中解析文件，识别账户、日期、交易对象、收支方向、金额和余额。需要审核的文件经过用户核对后导入；PDF 需检查记录完整性。
+2. **读取与核对**：在浏览器中解析文件，识别账户、日期、交易对象、收支方向、金额和余额。需要审核的文件经过用户核对后导入；美国银行美元支票账户的月结单 PDF 会在确认入账前核对各交易分项与账单列出的期初、期末余额。
 3. **加入账本**：多份账单持续追加，保留导入来源并检查可识别的重复记录。跨平台同一笔付款仍可能需要人工核对。
 4. **选择期间**：按全部月份或最近有数据的月份汇总，联动各模块。余额、应收等时点信息按各自日期展示。
 5. **计算与展示**：生成收支、余额、收入成本结构、现金预测、应收、分析建议及有资料支持的财务报表；点击图表可查看对应明细。

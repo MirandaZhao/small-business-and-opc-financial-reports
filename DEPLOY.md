@@ -1,6 +1,6 @@
 # Deployment
 
-Youshu 0.3.1 is a static web application. `index.html` is the homepage. No backend database or build step is required.
+Youshu 0.4.0 is a static web application. `index.html` is the homepage. No backend database or build step is required.
 
 ## Local use
 
@@ -25,7 +25,7 @@ When updating the website, retain all resources and their relative paths, then c
 
 # 部署说明
 
-下载压缩包。有数 0.3.1 是静态网页软件。`index.html` 为首页，不需要后端数据库或构建步骤。
+下载压缩包。有数 0.4.0 是静态网页软件。`index.html` 为首页，不需要后端数据库或构建步骤。
 
 ## 本机使用
 
