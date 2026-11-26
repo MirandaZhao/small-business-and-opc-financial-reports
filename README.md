@@ -8,7 +8,7 @@
 
 **Turn your WeChat, Alipay, and bank statements into a personalized financial report. Youshu makes professional financial reports easy to read for small businesses and solo founders.**
 
-v0.4.0 · No account required · Statements processed locally · English and Chinese reports · CNY or USD ledgers
+v0.3.1 · No account required · Statements processed locally · English and Chinese interface (CNY)
 
 ![A fictional studio received CNY 120,000 and paid CNY 72,000 in a month, leaving an operating cash surplus of CNY 48,000.](docs/media/en/cover.png)
 
@@ -28,11 +28,7 @@ Open **我的报告 (My report)**, add WeChat, Alipay, or bank statements, and r
 - **Find the underlying entries.** Click a monthly receipts or payments bar, or an income or cost category, to see the matching transactions. Check for a payment that appears on more than one platform when reviewing imports.
 - **Add business records as needed.** Enter outstanding customer invoices to track receivables. Statements show cash movements. Complete income statements and balance sheets require supporting accounting records.
 
-**Bank of America USD checking.** In **My report → Add statements**, select one or more original, text-based monthly PDFs. Before you confirm each import, Youshu checks the entries against the bank’s section totals and printed opening and closing balances. Importing the same PDF again skips the duplicate. Reports and exports show USD in either interface language.
-
-Keep USD and CNY in separate ledgers. If you already use Youshu for CNY, open it in a separate browser profile for your USD statements.
-
-For CNY ledgers, Youshu also accepts CSV, Excel and supported bank PDFs. Review the dates, amounts and directions in the import preview. For a scan that cannot be verified, use the bank’s Excel or CSV export.
+Youshu accepts CSV, Excel, and PDF files. For bank PDFs, check that all pages and transactions were read, then review dates, directions, and amounts. If a layout or scan is difficult to read, use the bank’s Excel or CSV export.
 
 ## What if a customer pays a month late?
 
@@ -42,10 +38,10 @@ Move the **客户付款 (Customer payment timing)** slider to see how the timing
 
 ## Open your first report
 
-**[Download Youshu v0.4.0][download]** · ZIP, about 20 MB
+**[Download Youshu v0.3.1][download]** · ZIP, about 13 MB
 
-1. **Download** `youshu-github-v0.4.0-bilingual.zip` to your computer using the link above.
-2. **Extract the entire ZIP.** Double-click it on macOS or right-click and choose **Extract All** on Windows. Open the extracted `youshu-github-v0.4.0` folder and keep `assets/` and `templates/` alongside `index.html`.
+1. **Download** `youshu-github-v0.3.1-bilingual.zip` to your computer using the link above.
+2. **Extract the entire ZIP.** Double-click it on macOS or right-click and choose **Extract All** on Windows. Open the extracted `youshu-github-v0.3.1` folder and keep `assets/` and `templates/` alongside `index.html`.
 3. **Double-click `index.html`.** Your browser opens the fictional report for Xingchen AI Applications Studio (星辰AI应用工作室). Select **Another example** to explore a different sample company at random. To start your own report, select **我的报告 (My report)** at the top right and add your statements.
 
 ![Getting started illustration showing the ZIP download, extraction, opening index.html, and the fictional studio report appearing in the browser.](docs/media/en/get-started.gif)
@@ -72,7 +68,7 @@ Maintained by Yuchen Zhao. [MIT License](LICENSE) · [Third-party notices](asset
 
 **把微信、支付宝和银行账单，变成个性化财务报告。专业还能看得懂！小微企业及OPC个人最佳搭子！**
 
-v0.4.0　·　无需注册　·　账单在本机处理　·　中英文双语报告　·　支持人民币账本和美元账本
+v0.3.1　·　无需注册　·　账单在本机处理　·　中英文双语界面（人民币）
 
 ![有数示例报告，星辰AI应用工作室当月经营收款 12 万元、付款 7.2 万元，经营结余 4.8 万元。](docs/media/zh/cover.png)
 
@@ -92,11 +88,7 @@ v0.4.0　·　无需注册　·　账单在本机处理　·　中英文双语�
 - **追到具体交易。** 点击月度收款柱、付款柱或收入与成本的构成项，查看对应明细。跨平台重复出现的同一笔付款也可以在核对时检查。
 - **补齐经营资料。** 有未收回的客户款项，可以补录应收。账单反映现金收支，完整的利润表和资产负债表还需要相应的账务资料。
 
-**美国银行（Bank of America）美元支票账户。** 在「我的报告 → 添加账单」选择银行下载的文字版月结单 PDF，可以一次选多份。有数会逐份核对交易分项合计，以及期初余额加收入、减支出后是否等于银行列出的期末余额。核对后即可确认导入。再次选择同一份 PDF 会跳过重复文件。无论选择中文还是英文，报告和导出的金额均标为美元。
-
-美元和人民币分别建账。如果已有人民币账本，可在另一个浏览器个人资料中打开有数，单独保存美元账本。
-
-人民币账本也支持 CSV、Excel 和适配的银行 PDF。请在导入预览中核对日期、收支方向和金额。扫描件难以核对时，可以改用银行导出的 Excel 或 CSV。
+支持 CSV、Excel 和 PDF。导入银行 PDF 时，请按页核对交易是否齐全，以及日期、收支方向和金额。遇到难以识别的版式或扫描件，可以改用银行导出的 Excel 或 CSV。
 
 ## 如果客户晚一个月付款？
 
@@ -106,10 +98,10 @@ v0.4.0　·　无需注册　·　账单在本机处理　·　中英文双语�
 
 ## 下载后怎么打开？
 
-**[下载有数 v0.4.0][download]**　·　ZIP 约 20 MB
+**[下载有数 v0.3.1][download]**　·　ZIP 约 13 MB
 
-1. **下载。** 点击上方下载链接，把 `youshu-github-v0.4.0-bilingual.zip` 保存到电脑。
-2. **解压。** 在 Mac 上双击 ZIP，在 Windows 上右键选择「全部解压缩」（Extract All）。打开解压后的 `youshu-github-v0.4.0` 文件夹，保留 `index.html`、`assets/` 和 `templates/` 的相对位置。
+1. **下载。** 点击上方下载链接，把 `youshu-github-v0.3.1-bilingual.zip` 保存到电脑。
+2. **解压。** 在 Mac 上双击 ZIP，在 Windows 上右键选择「全部解压缩」（Extract All）。打开解压后的 `youshu-github-v0.3.1` 文件夹，保留 `index.html`、`assets/` 和 `templates/` 的相对位置。
 3. **双击 `index.html`。** 浏览器会先显示「星辰AI应用工作室」的虚构示例报告。点击「再来一个」，可以随机体验另一家公司的示例报告。点击右上角「我的报告」，就能添加自己的账单，开始制作自己的报告。
 
 ![启动流程示意：下载有数 ZIP，完整解压，打开文件夹并双击 index.html，浏览器显示星辰AI应用工作室示例报告。](docs/media/zh/get-started.gif)
@@ -124,5 +116,5 @@ v0.4.0　·　无需注册　·　账单在本机处理　·　中英文双语�
 
 维护者为 Yuchen Zhao。项目使用 [MIT 许可证](LICENSE)，随包组件的许可见[第三方声明](assets/vendor/NOTICE.md)。
 
-[download]: https://raw.githubusercontent.com/MirandaZhao/OPC-Auto-Finance-Report/main/youshu-github-v0.4.0-bilingual.zip
+[download]: https://raw.githubusercontent.com/MirandaZhao/OPC-Auto-Finance-Report/main/youshu-github-v0.3.1-bilingual.zip
 [screenshots]: https://github.com/MirandaZhao/OPC-Auto-Finance-Report/blob/0b01624b5bdd5a7957433d5b7bfac73c7359e509/README.md
