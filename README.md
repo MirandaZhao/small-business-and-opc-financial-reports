@@ -6,7 +6,7 @@
 
 [Download the English demo (MP4, 17.5 seconds)](docs/media/en/youshu-demo.mp4?raw=1)
 
-**Turn your WeChat, Alipay, and bank statements into a personalized financial report. Youshu makes professional financial reports easy to read for small businesses and solo founders.**
+**Turn your WeChat Pay, Alipay, and bank statements (BOA, BOB, CMB, etc.) into a personalized financial report. Youshu makes professional financial reports easy to read for small businesses and solo founders.**
 
 v0.3.1 · No account required · Statements processed locally · English and Chinese interface (CNY)
 
