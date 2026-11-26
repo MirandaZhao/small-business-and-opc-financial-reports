@@ -8,7 +8,7 @@
 
 **Turn your WeChat Pay, Alipay, and bank statements (BOA, BOB, CMB, etc.) into a personalized financial report. Youshu makes professional financial reports easy to read for small businesses and solo founders.**
 
-v0.3.1 · No account required · Statements processed locally · English and Chinese interface (CNY)
+v0.4.0 · No account required · Statements processed locally · English and Chinese interface (CNY / USD)
 
 ![A fictional studio received CNY 120,000 and paid CNY 72,000 in a month, leaving an operating cash surplus of CNY 48,000.](docs/media/en/cover.png)
 
@@ -38,10 +38,10 @@ Move the **客户付款 (Customer payment timing)** slider to see how the timing
 
 ## Open your first report
 
-**[Download Youshu v0.3.1][download]** · ZIP, about 13 MB
+**[Download Youshu v0.4.0][download]** · ZIP, about 20 MB
 
-1. **Download** `youshu-github-v0.3.1-bilingual.zip` to your computer using the link above.
-2. **Extract the entire ZIP.** Double-click it on macOS or right-click and choose **Extract All** on Windows. Open the extracted `youshu-github-v0.3.1` folder and keep `assets/` and `templates/` alongside `index.html`.
+1. **Download** `youshu-github-v0.4.0-bilingual.zip` to your computer using the link above.
+2. **Extract the entire ZIP.** Double-click it on macOS or right-click and choose **Extract All** on Windows. Open the extracted `youshu-github-v0.4.0` folder and keep `assets/` and `templates/` alongside `index.html`.
 3. **Double-click `index.html`.** Your browser opens the fictional report for Xingchen AI Applications Studio (星辰AI应用工作室). Select **Another example** to explore a different sample company at random. To start your own report, select **我的报告 (My report)** at the top right and add your statements.
 
 ![Getting started illustration showing the ZIP download, extraction, opening index.html, and the fictional studio report appearing in the browser.](docs/media/en/get-started.gif)
@@ -68,7 +68,7 @@ Maintained by Yuchen Zhao. [MIT License](LICENSE) · [Third-party notices](asset
 
 **把微信、支付宝和银行账单，变成个性化财务报告。专业还能看得懂！小微企业及OPC个人最佳搭子！**
 
-v0.3.1　·　无需注册　·　账单在本机处理　·　中英文双语界面（人民币）
+v0.4.0　·　无需注册　·　账单在本机处理　·　中英文双语界面（人民币 / 美元）
 
 ![有数示例报告，星辰AI应用工作室当月经营收款 12 万元、付款 7.2 万元，经营结余 4.8 万元。](docs/media/zh/cover.png)
 
@@ -98,10 +98,10 @@ v0.3.1　·　无需注册　·　账单在本机处理　·　中英文双语�
 
 ## 下载后怎么打开？
 
-**[下载有数 v0.3.1][download]**　·　ZIP 约 13 MB
+**[下载有数 v0.4.0][download]**　·　ZIP 约 20 MB
 
-1. **下载。** 点击上方下载链接，把 `youshu-github-v0.3.1-bilingual.zip` 保存到电脑。
-2. **解压。** 在 Mac 上双击 ZIP，在 Windows 上右键选择「全部解压缩」（Extract All）。打开解压后的 `youshu-github-v0.3.1` 文件夹，保留 `index.html`、`assets/` 和 `templates/` 的相对位置。
+1. **下载。** 点击上方下载链接，把 `youshu-github-v0.4.0-bilingual.zip` 保存到电脑。
+2. **解压。** 在 Mac 上双击 ZIP，在 Windows 上右键选择「全部解压缩」（Extract All）。打开解压后的 `youshu-github-v0.4.0` 文件夹，保留 `index.html`、`assets/` 和 `templates/` 的相对位置。
 3. **双击 `index.html`。** 浏览器会先显示「星辰AI应用工作室」的虚构示例报告。点击「再来一个」，可以随机体验另一家公司的示例报告。点击右上角「我的报告」，就能添加自己的账单，开始制作自己的报告。
 
 ![启动流程示意：下载有数 ZIP，完整解压，打开文件夹并双击 index.html，浏览器显示星辰AI应用工作室示例报告。](docs/media/zh/get-started.gif)
@@ -116,5 +116,5 @@ v0.3.1　·　无需注册　·　账单在本机处理　·　中英文双语�
 
 维护者为 Yuchen Zhao。项目使用 [MIT 许可证](LICENSE)，随包组件的许可见[第三方声明](assets/vendor/NOTICE.md)。
 
-[download]: https://raw.githubusercontent.com/MirandaZhao/OPC-Auto-Finance-Report/main/youshu-github-v0.3.1-bilingual.zip
+[download]: https://raw.githubusercontent.com/MirandaZhao/OPC-Auto-Finance-Report/main/youshu-github-v0.4.0-bilingual.zip
 [screenshots]: https://github.com/MirandaZhao/OPC-Auto-Finance-Report/blob/0b01624b5bdd5a7957433d5b7bfac73c7359e509/README.md
