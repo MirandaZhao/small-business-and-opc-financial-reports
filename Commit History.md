@@ -4,14 +4,14 @@
 
 ## English
 
-This document records **all 80 commits reachable from `main` at the snapshot below**, preserving their original subjects and complete bodies. The English and Chinese summaries organize those records into development periods. Earlier version notes are retained with their historical source links.
+This document records **all 82 commits reachable from `main` at the snapshot below**, preserving their original subjects and complete bodies. The English and Chinese summaries organize those records into development periods. Earlier version notes are retained with their historical source links.
 
 - **Repository:** [MirandaZhao/OPC-Auto-Finance-Report](https://github.com/MirandaZhao/OPC-Auto-Finance-Report); branch: `main`.
-- **Coverage:** 2026-09-22 to 2026-11-26, using committer timestamps in Asia/Shanghai (UTC+08:00).
-- **Snapshot:** [7009d1d](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/7009d1d78f9f7dfdbe7d748eb8b9af31163de18b) (`7009d1d78f9f7dfdbe7d748eb8b9af31163de18b`), committed 2026-11-26 22:18:39 UTC+08:00.
-- **Count:** 80 original commit records, ordered from oldest to newest.
-- **Prepared:** 2026-11-26. Commits after this snapshot, including any later commit that publishes this regenerated file, are outside its scope.
-- **Source:** [GitHub commit list at the pinned snapshot](https://api.github.com/repos/MirandaZhao/OPC-Auto-Finance-Report/commits?sha=7009d1d78f9f7dfdbe7d748eb8b9af31163de18b&per_page=100&page=1).
+- **Coverage:** 2026-09-22 to 2026-11-27, using committer timestamps in Asia/Shanghai (UTC+08:00).
+- **Snapshot:** [b4b5715](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/b4b57154340a02112355e58b595370529424a169) (`b4b57154340a02112355e58b595370529424a169`), committed 2026-11-27 00:01:08 UTC+08:00.
+- **Count:** 82 original commit records, ordered from oldest to newest.
+- **Prepared:** 2026-11-27. Commits after this snapshot, including any later commit that publishes this regenerated file, are outside its scope.
+- **Source:** [GitHub commit list at the pinned snapshot](https://api.github.com/repos/MirandaZhao/OPC-Auto-Finance-Report/commits?sha=b4b57154340a02112355e58b595370529424a169&per_page=100&page=1).
 
 **How this document was prepared:** The period summaries are written from the recorded commit messages. They distinguish application changes from documentation, packaging and cleanup. The original messages below retain wording, spelling and full bodies; only line endings are normalized for Markdown. Test results and pending work are attributed to the historical messages that report them. Regenerating this history does not rerun the software tests or establish a new deployment.
 
@@ -19,7 +19,8 @@ This document records **all 80 commits reachable from `main` at the snapshot bel
 
 | Period (UTC+08:00) | Commits | Summary |
 |---|---:|---|
-| 2026-11-26 | 5 | Add Bank of America imports, publish v0.4.0 and restore the previous README |
+| 2026-11-27 | 1 | Keep one current download for testers |
+| 2026-11-26 | 6 | Add Bank of America imports, publish v0.4.0 and restore the previous README |
 | 2026-11-19 | 3 | Read reports in English or Chinese and preview them before importing statements |
 | 2026-11-17 | 3 | Put English first in project guides, clean up templates and document earlier changes |
 | 2026-11-02 | 2 | Explain report creation and add README visuals |
@@ -28,11 +29,17 @@ This document records **all 80 commits reachable from `main` at the snapshot bel
 | 2026-10-22 to 2026-10-23 | 4 | Publish bilingual prototype explanations while application materials remained pending |
 | 2026-09-28 to 2026-10-10 | 16 | Expand design, evaluation and operating guidance |
 | 2026-09-22 | 15 | Establish the initial project and documentation |
-| **Total** | **80** | |
+| **Total** | **82** | |
+
+### 2026-11-27 | Keep one current download for testers
+
+1 commit.
+
+- Remove the v0.3.1 ZIP and point the English and Chinese README download links and extraction instructions to v0.4.0 so testers can open the current app. [b4b5715](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/b4b57154340a02112355e58b595370529424a169).
 
 ### 2026-11-26 | Add Bank of America imports, publish v0.4.0 and restore the previous README
 
-5 commits.
+6 commits.
 
 - Import Bank of America USD checking PDFs and check the entries against the statement totals and balances. Users can review their dollar transactions in English or Chinese and keep them separate from CNY records. [55ebf58](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/55ebf584467ed745352dad642397352ee40b76e3).
 
@@ -43,6 +50,8 @@ This document records **all 80 commits reachable from `main` at the snapshot bel
 - Document the restoration of the earlier README and its v0.3.1 download link in the bilingual commit archive. [a25d0ee](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/a25d0ee94600f1081d9423c674e226aa7beb349e).
 
 - List BOA, BOB and CMB in the opening sentence of the English README and use the name WeChat Pay so readers can recognize their statement sources. [7009d1d](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/7009d1d78f9f7dfdbe7d748eb8b9af31163de18b).
+
+- Record the bank names and WeChat Pay wording in the bilingual commit history so readers can trace the English introduction to its original change. [ad664f1](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/ad664f1ac500a2d196f859f4036287c4bafe2742).
 
 ### 2026-11-19 | Read reports in English or Chinese and preview them before importing statements
 
@@ -161,7 +170,7 @@ First public version.
 
 ## Original commit messages
 
-The following 80 entries preserve the original subjects and complete bodies. All records are expanded and ordered from oldest to newest. Each entry includes the full commit hash, GitHub author account when available, committer timestamp in Asia/Shanghai (UTC+08:00), and a link to the recorded change.
+The following 82 entries preserve the original subjects and complete bodies. All records are expanded and ordered from oldest to newest. Each entry includes the full commit hash, GitHub author account when available, committer timestamp in Asia/Shanghai (UTC+08:00), and a link to the recorded change.
 
 Message text is retained as recorded, including historical statements about language order, reported checks and work that was still pending at the time.
 
@@ -1056,17 +1065,39 @@ Message text is retained as recorded, including historical statements about lang
 >
 > List BOA, BOB and CMB in the English opening sentence and use the WeChat Pay name for payment statements.
 
+#### 81 · ad664f1
+
+- **Commit:** `ad664f1ac500a2d196f859f4036287c4bafe2742`
+- **Author account:** [MirandaZhao](https://github.com/MirandaZhao)
+- **Committed:** 2026-11-26 22:23:52 UTC+08:00
+- **Source:** [View commit and changes](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/ad664f1ac500a2d196f859f4036287c4bafe2742)
+
+> Record the README bank list so readers can trace the wording change
+
+### 2026-11-27
+
+#### 82 · b4b5715
+
+- **Commit:** `b4b57154340a02112355e58b595370529424a169`
+- **Author account:** [MirandaZhao](https://github.com/MirandaZhao)
+- **Committed:** 2026-11-27 00:01:08 UTC+08:00
+- **Source:** [View commit and changes](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/b4b57154340a02112355e58b595370529424a169)
+
+> Retire the v0.3.1 ZIP so testers download the current Youshu app
+>
+> Remove the superseded archive from the default branch and point both README download links, file names and extraction instructions to the bilingual v0.4.0 package.
+
 ---
 
 ## 中文
 
-本文件收录**截止下方快照、可从 `main` 分支追溯的全部 80 条提交**，逐条保留原始标题和完整正文。中英文摘要按开发阶段归纳，另保留早期版本说明及其历史来源链接。
+本文件收录**截止下方快照、可从 `main` 分支追溯的全部 82 条提交**，逐条保留原始标题和完整正文。中英文摘要按开发阶段归纳，另保留早期版本说明及其历史来源链接。
 
 - **仓库：** [MirandaZhao/OPC-Auto-Finance-Report](https://github.com/MirandaZhao/OPC-Auto-Finance-Report)；分支：`main`。
-- **覆盖期间：** 2026-09-22 至 2026-11-26，按提交者时间换算为北京时间（Asia/Shanghai，UTC+08:00）。
-- **截止提交：** [7009d1d](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/7009d1d78f9f7dfdbe7d748eb8b9af31163de18b)（`7009d1d78f9f7dfdbe7d748eb8b9af31163de18b`），提交时间为 2026-11-26 22:18:39 UTC+08:00。
-- **记录数量：** 80 条，原始记录按最早到最近完整展开。
-- **整理日期：** 2026-11-26。本次快照之后的提交，包括后续发布这份重新生成文档的提交，不在收录范围内。
+- **覆盖期间：** 2026-09-22 至 2026-11-27，按提交者时间换算为北京时间（Asia/Shanghai，UTC+08:00）。
+- **截止提交：** [b4b5715](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/b4b57154340a02112355e58b595370529424a169)（`b4b57154340a02112355e58b595370529424a169`），提交时间为 2026-11-27 00:01:08 UTC+08:00。
+- **记录数量：** 82 条，原始记录按最早到最近完整展开。
+- **整理日期：** 2026-11-27。本次快照之后的提交，包括后续发布这份重新生成文档的提交，不在收录范围内。
 - **原始记录：** [查看全部提交说明](#original-commit-messages)。
 
 **整理方法：** 阶段摘要依据 GitHub 中的提交说明编写，分别表述软件更改、文档修改、打包和文件清理。原始提交的措辞、拼写和正文完整保留，仅统一换行格式。历史消息中的测试结果、未完成事项及当时的语言顺序均按当时记录保留；重新整理本文件不代表重新执行软件测试或完成新的部署。
@@ -1075,7 +1106,8 @@ Message text is retained as recorded, including historical statements about lang
 
 | 期间（北京时间） | 提交数 | 阶段内容 |
 |---|---:|---|
-| 2026-11-26 | 5 | 支持美国银行账单导入、发布 v0.4.0 并恢复先前的 README |
+| 2026-11-27 | 1 | 为试用者保留一个当前版本下载包 |
+| 2026-11-26 | 6 | 支持美国银行账单导入、发布 v0.4.0 并恢复先前的 README |
 | 2026-11-19 | 3 | 支持中英文报告，导入账单前即可观看演示 |
 | 2026-11-17 | 3 | 调整双语文档顺序、清理模板目录并整理提交历史 |
 | 2026-11-02 | 2 | 补充报告制作说明与 README 配图 |
@@ -1084,11 +1116,17 @@ Message text is retained as recorded, including historical statements about lang
 | 2026-10-22 至 2026-10-23 | 4 | 发布双语原型说明并标明应用材料待上传 |
 | 2026-09-28 至 2026-10-10 | 16 | 细化设计、评估与操作说明 |
 | 2026-09-22 | 15 | 建立初始项目与配套文档 |
-| **合计** | **80** | |
+| **合计** | **82** | |
+
+### 2026-11-27｜为试用者保留一个当前版本下载包
+
+共 1 条提交。
+
+- 移除 v0.3.1 压缩包，将中英文 README 的下载入口和解压说明更新为 v0.4.0，方便试用者下载并打开当前版本。[b4b5715](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/b4b57154340a02112355e58b595370529424a169)。
 
 ### 2026-11-26｜支持美国银行账单导入、发布 v0.4.0 并恢复先前的 README
 
-共 5 条提交。
+共 6 条提交。
 
 - 支持导入美国银行美元支票账户月结单 PDF，并核对交易明细、分项合计与账单余额。用户可以用中文或英文查看美元收支，美元和人民币分别建账。[55ebf58](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/55ebf584467ed745352dad642397352ee40b76e3)。
 
@@ -1099,6 +1137,8 @@ Message text is retained as recorded, including historical statements about lang
 - 在中英文提交历史中记录 README 及 v0.3.1 下载链接的恢复，方便读者追溯这次改动。[a25d0ee](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/a25d0ee94600f1081d9423c674e226aa7beb349e)。
 
 - 在 README 英文首句列出 BOA、BOB 和 CMB，并使用 WeChat Pay 名称，方便读者确认自己的账单来源。[7009d1d](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/7009d1d78f9f7dfdbe7d748eb8b9af31163de18b)。
+
+- 在中英文提交历史中记录银行简称和 WeChat Pay 的表述，方便读者追溯英文首句的修改。[ad664f1](https://github.com/MirandaZhao/OPC-Auto-Finance-Report/commit/ad664f1ac500a2d196f859f4036287c4bafe2742)。
 
 ### 2026-11-19｜支持中英文报告，导入账单前即可观看演示
 
